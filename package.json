@@ -1,0 +1,17 @@
+{
+  "name": "passkeys-example",
+  "version": "0.0.1",
+  "description": "Passkeys examples",
+  "main": "dist/index.js",
+  "scripts": {
+    "prepare": "npm run build",
+    "prebuild": "rm -rf dist",
+    "build": "tsc --build",
+    "watch": "tsc --watch"
+  },
+  "author": "Neal Fennimore",
+  "license": "MIT",
+  "dependencies": {
+    "base64url": "^3.0.1"
+  }
+}
