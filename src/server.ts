@@ -1,4 +1,4 @@
-import { decode, safeDecode } from "./utils.js";
+import { concatBuffer, decode, safeDecode } from "./utils.js";
 
 interface UserCredential {
     kid: string;
@@ -22,26 +22,24 @@ class Cache {
     static async store(key: CacheKey, value: CacheValue) {
         window.localStorage.setItem(key, JSON.stringify(value));
     }
+}
 
+class Context {
     static async getCurrentUser(){
         return await Cache.retrieve('currentUserId') as string;
     }
 
     static async getCredentials(){
-        const userId = await Cache.getCurrentUser();
+        const userId = await Context.getCurrentUser();
         return await Cache.retrieve(userId) as UserCredentialCache;
+    }
+
+    static async generateChallenge(){
+        return safeDecode(crypto.getRandomValues(new Uint8Array(16)))
     }
 }
 
 class Crypto {
-
-    static concatBuffer(buffer1: ArrayBuffer, buffer2: ArrayBuffer) {
-        var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
-        tmp.set(new Uint8Array(buffer1), 0);
-        tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
-        return tmp.buffer;
-    }
-
     static async toCryptoKey(pubKey: ArrayBuffer) {
         return await crypto.subtle.importKey(
             'spki',
@@ -58,39 +56,15 @@ class Crypto {
     static async fromJWK(jwk: JsonWebKey) {
         return await crypto.subtle.importKey('jwk', jwk, {name: "ECDSA", namedCurve: "P-256"}, true, ['verify']);
     }
-
-    static async verify(pubKey: CryptoKey, assertion: AuthenticatorAssertionResponse) {
-        // @ts-ignore
-        const { clientDataJSON, authenticatorData, signature } = assertion.response;
-
-        // Convert from DER ASN.1 encoding to Raw ECDSA signature
-        const offset = new Uint8Array(signature)[4] === 0 ? 1 : 0;
-        const rawSig = Crypto.concatBuffer(
-            signature.slice(4 + offset, 36 + offset),
-            signature.slice(-32),
-        );
-
-        const digest = Crypto.concatBuffer(
-            authenticatorData,
-            await crypto.subtle.digest('SHA-256', clientDataJSON)
-        );
-
-        return await crypto.subtle.verify(
-            {name: "ECDSA", hash: { name: "SHA-256"} },
-            pubKey,
-            rawSig,
-            digest
-        );
-    }
 }
 
 class Attestation {
     static async generateUser(){
         const userId = window.crypto.randomUUID();
-        const challenge = await API.getChallenge();
+        const challenge = await Context.generateChallenge();
         const credentials: UserCredentialCache = {
             userId,
-            challenge: safeDecode(challenge)
+            challenge,
         };
         Cache.store('currentUserId', userId);
         Cache.store(userId, credentials);
@@ -108,7 +82,7 @@ class Attestation {
             throw new Error("Wrong credential type")
         }
 
-        const currentCredentials = await Cache.getCredentials();
+        const currentCredentials = await Context.getCredentials();
         const { credentials = [], challenge: storedChallenge } = currentCredentials;
         
         if (challenge !== storedChallenge){
@@ -131,15 +105,39 @@ class Attestation {
 }
 
 class Assertion {
-    static async getChallengeForCurrentUser(userId: string){
-        const challenge = await API.getChallenge();
-        const currentCredentials = await Cache.getCredentials();
+    private static async verify(pubKey: CryptoKey, assertion: AuthenticatorAssertionResponse) {
+        // @ts-ignore
+        const { clientDataJSON, authenticatorData, signature } = assertion.response;
+
+        // Convert from DER ASN.1 encoding to Raw ECDSA signature
+        const offset = new Uint8Array(signature)[4] === 0 ? 1 : 0;
+        const rawSig = concatBuffer(
+            signature.slice(4 + offset, 36 + offset),
+            signature.slice(-32),
+        );
+
+        const digest = concatBuffer(
+            authenticatorData,
+            await crypto.subtle.digest('SHA-256', clientDataJSON)
+        );
+
+        return await crypto.subtle.verify(
+            {name: "ECDSA", hash: { name: "SHA-256"} },
+            pubKey,
+            rawSig,
+            digest
+        );
+    }
+
+    static async generateChallengeForCurrentUser(){
+        const challenge = await Context.generateChallenge();
+        const currentCredentials = await Context.getCredentials();
         const credentials: UserCredentialCache = {
             ...currentCredentials,
-            challenge: safeDecode(challenge)
+            challenge,
         };
-        Cache.store(userId, credentials);
-        return credentials;
+        Cache.store(currentCredentials.userId, credentials);
+        return challenge;
     }
 
     static async verifyCredential(credential: PublicKeyCredential) {
@@ -151,7 +149,7 @@ class Assertion {
             throw new Error("Wrong credential type")
         }
 
-        const currentCredentials = await Cache.getCredentials();
+        const currentCredentials = await Context.getCredentials();
         const { credentials = [], challenge: storedChallenge } = currentCredentials;
 
         if (challenge !== storedChallenge){
@@ -164,16 +162,14 @@ class Assertion {
         
         return credentials.some(async ({jwk})=>{
             const key = await Crypto.fromJWK(jwk);
-            return await Crypto.verify(key, response);
+            return await Assertion.verify(key, response);
         })
     }
 }
 
 export class API {
-    static async getChallenge(){
-        return crypto.getRandomValues(new Uint8Array(16))
-    }
 
+    static getChallenge = Context.generateChallenge;
     static Attestation = Attestation;
     static Assertion = Assertion;
 }

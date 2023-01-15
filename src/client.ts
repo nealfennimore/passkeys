@@ -1,5 +1,5 @@
 import * as server from './server';
-import { encode, safeEncode } from './utils';
+import { encode } from './utils';
 
 enum COSEAlgorithm {
     ES256 = -7,
@@ -18,7 +18,7 @@ if (window.PublicKeyCredential
         const { userId, challenge } = await server.API.Attestation.generateUser();
         const abortController = new AbortController();
         const publicKey: PublicKeyCredentialCreationOptions = {
-            challenge: safeEncode(challenge),
+            challenge: encode(challenge),
             rp: {
                 id: window.location.host,
                 name: document.title,
@@ -49,10 +49,10 @@ if (window.PublicKeyCredential
     }
 
     async function assertion() {
-        const challenge = await server.API.getChallenge();
+        const challenge = await server.API.Assertion.generateChallengeForCurrentUser();
         const abortController = new AbortController();
         const publicKey: PublicKeyCredentialRequestOptions = {
-            challenge,
+            challenge: encode(challenge),
             rpId: window.location.host,
             timeout: 60_000,
         };
