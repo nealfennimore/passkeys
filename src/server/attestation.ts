@@ -30,12 +30,13 @@ export class Attestation {
         const currentCredentials = await Context.getCredentials();
         const { credentials = [], challenge: storedChallenge } = currentCredentials;
         
-        if (challenge !== storedChallenge){
+        if (storedChallenge !== null && challenge !== storedChallenge){
             throw new Error("Incorrect challenge");
         }
         
         Cache.store(currentCredentials.userId, {
             ...currentCredentials,
+            challenge: null,
             credentials: [
                 ...credentials,
                 // @ts-ignore

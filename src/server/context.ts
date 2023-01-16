@@ -7,7 +7,7 @@ export interface UserCredential {
 
 export interface UserCredentialCache {
     userId: string;
-    challenge: string;
+    challenge: string | null;
     credentials?: [UserCredential]
 }
 

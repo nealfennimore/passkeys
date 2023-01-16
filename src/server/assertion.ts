@@ -50,7 +50,7 @@ export class Assertion {
         const currentCredentials = await Context.getCredentials();
         const { credentials = [], challenge: storedChallenge } = currentCredentials;
 
-        if (challenge !== storedChallenge){
+        if (storedChallenge !== null && challenge !== storedChallenge){
             throw new Error("Incorrect challenge");
         }
 
@@ -58,9 +58,17 @@ export class Assertion {
             throw new Error("No credentials found");
         }
         
-        return credentials.some(async ({jwk})=>{
+        const isVerified = credentials.some(async ({jwk})=>{
             const key = await Crypto.fromJWK(jwk);
             return await Assertion.verify(key, response);
-        })
+        });
+
+        if(isVerified){
+            Cache.store(currentCredentials.userId, {
+                ...currentCredentials,
+                challenge: null,
+            });
+        }
+        return isVerified;
     }
 }
