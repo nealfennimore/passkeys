@@ -5,9 +5,11 @@
   "main": "dist/index.js",
   "scripts": {
     "prepare": "npm run build",
-    "prebuild": "rm -rf dist",
+    "prebuild": "rm -rf build",
     "build": "tsc --build",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "predeploy": "npm run build && cp src/assets/* build/",
+    "deploy": "gh-pages -d build"
   },
   "author": "Neal Fennimore",
   "license": "MIT",

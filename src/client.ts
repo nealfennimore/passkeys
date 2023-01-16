@@ -14,7 +14,7 @@ if (window.PublicKeyCredential
     && await PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable?.() 
     // && await PublicKeyCredential?.isConditionalMediationAvailable?.())
 ){
-    async function attestation(name: string, displayName: string){
+    async function attestation(username: string){
         const { userId, challenge } = await server.API.Attestation.generateUser();
         const abortController = new AbortController();
         const publicKey: PublicKeyCredentialCreationOptions = {
@@ -25,8 +25,8 @@ if (window.PublicKeyCredential
             },
             user: {
                 id: encode(userId),
-                name,
-                displayName,
+                name: username,
+                displayName: username,
             },
             pubKeyCredParams: [{
                 type: "public-key",
@@ -63,5 +63,16 @@ if (window.PublicKeyCredential
         }) as PublicKeyCredential;
         await server.API.Assertion.verifyCredential(credential);
     }
+
+    document.querySelector('form#attestation')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(e.target as HTMLFormElement);
+        await attestation(data.get('username') as string)
+    });
+    document.querySelector('form#assertion')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(e.target as HTMLFormElement);
+        await assertion();
+    });
 }
 
