@@ -1,5 +1,5 @@
-import * as server from './server';
-import { encode } from './utils';
+import * as server from './server.js';
+import { encode } from './utils.js';
 var COSEAlgorithm;
 (function (COSEAlgorithm) {
     COSEAlgorithm[COSEAlgorithm["ES256"] = -7] = "ES256";
