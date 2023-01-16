@@ -1,5 +1,5 @@
-import * as server from './server';
-import { encode } from './utils';
+import * as server from './server.js';
+import { encode } from './utils.js';
 
 enum COSEAlgorithm {
     ES256 = -7,
