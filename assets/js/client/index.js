@@ -1,6 +1,6 @@
-import * as server from './server.js';
-import { encode } from './utils.js';
-var COSEAlgorithm;
+import * as server from '../server/index.js';
+import { encode } from '../utils.js';
+export var COSEAlgorithm;
 (function (COSEAlgorithm) {
     COSEAlgorithm[COSEAlgorithm["ES256"] = -7] = "ES256";
     COSEAlgorithm[COSEAlgorithm["ES384"] = -35] = "ES384";
@@ -11,9 +11,8 @@ var COSEAlgorithm;
 })(COSEAlgorithm || (COSEAlgorithm = {}));
 if (window.PublicKeyCredential
     && await PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable?.()) {
-    async function attestation(username) {
+    async function attestation(abortController, username) {
         const { userId, challenge } = await server.API.Attestation.generateUser();
-        const abortController = new AbortController();
         const publicKey = {
             challenge: encode(challenge),
             rp: {
@@ -43,9 +42,8 @@ if (window.PublicKeyCredential
         });
         await server.API.Attestation.storeCredential(credential);
     }
-    async function assertion() {
+    async function assertion(abortController) {
         const challenge = await server.API.Assertion.generateChallengeForCurrentUser();
-        const abortController = new AbortController();
         const publicKey = {
             challenge: encode(challenge),
             rpId: window.location.host,
@@ -58,15 +56,21 @@ if (window.PublicKeyCredential
         });
         await server.API.Assertion.verifyCredential(credential);
     }
+    const cancelButton = document.querySelector('button#cancel');
     document.querySelector('form#attestation')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = new FormData(e.target);
-        await attestation(data.get('username'));
+        const abortController = new AbortController();
+        cancelButton?.addEventListener('click', abortController.abort, { once: true, signal: abortController.signal });
+        await attestation(abortController, data.get('username'));
+        abortController.abort();
     });
     document.querySelector('form#assertion')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const data = new FormData(e.target);
-        await assertion();
+        const abortController = new AbortController();
+        cancelButton?.addEventListener('click', abortController.abort, { once: true, signal: abortController.signal });
+        await assertion(abortController);
+        abortController.abort();
     });
 }
-//# sourceMappingURL=client.js.map
+//# sourceMappingURL=index.js.map
