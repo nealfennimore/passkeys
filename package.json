@@ -15,5 +15,8 @@
   "license": "MIT",
   "dependencies": {
     "base64url": "^3.0.1"
+  },
+  "devDependencies": {
+    "gh-pages": "^4.0.0"
   }
 }
