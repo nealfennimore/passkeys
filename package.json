@@ -8,8 +8,8 @@
     "prebuild": "rm -rf build",
     "build": "tsc --build",
     "watch": "tsc --watch",
-    "predeploy": "npm run build && cp src/assets/* docs/",
-    "deploy": "gh-pages -d docs"
+    "predeploy": "npm run build && cp src/assets/* build/",
+    "deploy": "gh-pages -d build"
   },
   "author": "Neal Fennimore",
   "license": "MIT",

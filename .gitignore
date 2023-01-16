@@ -2,4 +2,4 @@ node_modules
 shell.nix
 .envrc
 .direnv
-/docs
+/build
