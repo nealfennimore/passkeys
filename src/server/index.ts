@@ -7,12 +7,13 @@ const router = Router();
 
 router.post('/attestation/generate', async (request) => {
 	const ctx = new Context(request as unknown as Request);
-	return Attestation.generateUser(ctx, "");
+	const data = await request.json();
+	return Attestation.generateUser(ctx, data.username);
 });
 router.post('/attestation/store', async (request) => {
 	const ctx = new Context(request as unknown as Request);
-	const content = await request.json()
-	const credential = content.credential as PublicKeyCredential;
+	const data = await request.json();
+	const credential = data.credential as PublicKeyCredential;
 	return Attestation.storeCredential(ctx, credential);
 });
 
@@ -23,8 +24,8 @@ router.post('/assertion/generate',  async (request) => {
 
 router.post('/assertion/verify',  async (request) => {
 	const ctx = new Context(request as unknown as Request);
-	const content = await request.json()
-	const credential = content.credential as PublicKeyCredential;
+	const data = await request.json();
+	const credential = data.credential as PublicKeyCredential;
 	return Assertion.verifyCredential(ctx, credential);
 });
 
