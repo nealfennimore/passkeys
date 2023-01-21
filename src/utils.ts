@@ -15,6 +15,9 @@ export function escape (str: string) {
     .replace(/=/g, '')
 }
 
+export const marshal = JSON.stringify
+export const unmarshal = JSON.parse
+
 export const toBase64Url = (str: string)=> escape(btoa(str))
 export const fromBase64Url = (str: string) => atob(unescape(str))
 
@@ -27,3 +30,8 @@ export function concatBuffer(buffer1: ArrayBuffer, buffer2: ArrayBuffer) {
     tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
     return tmp.buffer;
 }
+
+export enum WebAuthnType {
+    Create = 'webauthn.create',
+    Get = 'webauthn.get',
+};

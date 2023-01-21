@@ -1,0 +1,11 @@
+name = "api"
+main = "src/server/index.ts"
+compatibility_date = "2023-01-16"
+
+kv_namespaces = [
+    { binding = "pubkeys", id = "bd6e3a242332404997d7fcc2412c3502" },
+    { binding = "sessions", id = "5c59602174ea4bb29543e0a63d2fef2a" },
+    { binding = "challenges", id = "fcf01b2762c84b2db20630ef1ba561f2" },
+]
+
+routes = []

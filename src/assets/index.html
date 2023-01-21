@@ -14,7 +14,11 @@
 <body>
 
     <form id="attestation">
-        <input type="text" name="username" placeholder="Username">
+        <fieldset>
+            <label for="username">Username</label>
+            <input type="text" name="username" placeholder="Username" autocomplete="username webauthn">
+        </fieldset>
+
         <button type="submit">
             <span>Signup</span>
         </button>

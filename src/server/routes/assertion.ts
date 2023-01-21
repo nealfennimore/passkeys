@@ -1,6 +1,6 @@
-import { concatBuffer, decode } from "../utils.js";
-import { Cache, Context, UserCredentialCache } from './context.js';
-import { Crypto, Digests, SigningAlg } from './crypto.js';
+import { concatBuffer, decode, marshal, WebAuthnType } from "../../utils.js";
+import { Context } from '../context';
+import { Crypto, Digests, SigningAlg } from '../crypto.js';
 
 export class Assertion {
     private static async verify(pubKey: CryptoKey, assertion: AuthenticatorAssertionResponse) {
@@ -27,33 +27,31 @@ export class Assertion {
         );
     }
 
-    static async generateChallengeForCurrentUser(){
-        const challenge = await Context.generateChallenge();
-        const currentCredentials = await Context.getCredentials();
-        const credentials: UserCredentialCache = {
-            ...currentCredentials,
-            challenge,
-        };
-        Cache.store(currentCredentials.userId, credentials);
-        return challenge;
+    static async generateChallengeForCurrentUser(ctx: Context){
+        const challenge = await ctx.generateChallenge();        
+        await ctx.setChallenge(WebAuthnType.Get, challenge)
+        return new Response(marshal({challenge}), {
+            headers: {
+                'content-type': 'application/json;charset=UTF-8',
+            }
+        });
     }
 
-    static async verifyCredential(credential: PublicKeyCredential) {
+    static async verifyCredential(ctx: Context, credential: PublicKeyCredential) {
         const response = credential.response as AuthenticatorAssertionResponse;
         const { clientDataJSON } = response;
         const { challenge, type } = JSON.parse(decode(clientDataJSON))
 
-        if (type !== 'webauthn.get') {
+        if (type !== WebAuthnType.Get) {
             throw new Error("Wrong credential type")
         }
 
-        const currentCredentials = await Context.getCredentials();
-        const { credentials = [], challenge: storedChallenge } = currentCredentials;
-
+        const storedChallenge = await ctx.getChallenge(WebAuthnType.Get);
         if (storedChallenge !== null && challenge !== storedChallenge){
             throw new Error("Incorrect challenge");
         }
-
+        
+        const credentials = await ctx.getCredentials();
         if (!credentials.length){
             throw new Error("No credentials found");
         }
@@ -63,12 +61,14 @@ export class Assertion {
             return await Assertion.verify(key, response);
         });
 
-        if(isVerified){
-            Cache.store(currentCredentials.userId, {
-                ...currentCredentials,
-                challenge: null,
-            });
+        if (isVerified){
+            ctx.setChallenge(WebAuthnType.Get, null);
         }
-        return isVerified;
+
+        return new Response(marshal({isVerified}), {
+            headers: {
+                'content-type': 'application/json;charset=UTF-8',
+            }
+        });
     }
 }

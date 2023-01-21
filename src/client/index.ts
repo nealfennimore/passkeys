@@ -1,4 +1,4 @@
-import * as server from '../server/index.js';
+import * as server from '../server/api.js';
 import { encode } from '../utils.js';
 
 export enum COSEAlgorithm {
@@ -32,9 +32,8 @@ if (window.PublicKeyCredential
                 alg: COSEAlgorithm.ES256,
             }],
             authenticatorSelection: {
-                authenticatorAttachment: 'platform',
                 userVerification: 'preferred',
-                requireResidentKey: true,
+                residentKey: 'required'
             },
             attestation: 'indirect',
             timeout: 60_000,

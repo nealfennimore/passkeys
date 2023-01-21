@@ -1,40 +1,47 @@
-import { safeDecode } from "../utils.js";
+import { fromBase64Url, marshal, safeDecode, toBase64Url, unmarshal } from "../utils.js";
 
 export interface UserCredential {
     kid: string;
     jwk: JsonWebKey;
 }
 
-export interface UserCredentialCache {
-    userId: string;
-    challenge: string | null;
-    credentials?: [UserCredential]
-}
-
-type CacheKey = 'currentUserId' | string
-type CacheValue = string | UserCredentialCache;
-
-export class Cache {
-    static async retrieve(key: CacheKey) {
-        const item = window.localStorage.getItem(key);
-        return item ? JSON.parse(item) : {};
-    }
-    static async store(key: CacheKey, value: CacheValue) {
-        window.localStorage.setItem(key, JSON.stringify(value));
-    }
-}
-
 export class Context {
-    static async getCurrentUser(){
-        return await Cache.retrieve('currentUserId') as string;
+    private request: Request;
+
+    constructor(request: Request){
+        this.request = request;
     }
 
-    static async getCredentials(){
-        const userId = await Context.getCurrentUser();
-        return await Cache.retrieve(userId) as UserCredentialCache;
+    async getCurrentUserId(){
+        return await sessions.get(this.request.headers.get('sessionId')) as string;
     }
 
-    static async generateChallenge(){
+    async setCurrentUserId(sessionId: string, userId: string){
+        return await sessions.set(sessionId, userId);
+    }
+
+    async getChallenge(type: string){
+        const userId = await this.getCurrentUserId();
+        return await challenges.get(`${userId}:${type}`) ?? null;
+    }
+
+    async setChallenge(type: string, challenge: string | null){
+        const userId = await this.getCurrentUserId();
+        return await challenges.set(`${userId}:${type}`, challenge)
+    }
+
+    async getCredentials(){
+        const userId = await this.getCurrentUserId();
+        const creds = await pubkeys.get(userId);
+        return unmarshal(fromBase64Url(creds)) as Array<UserCredential>;
+    }
+
+    async setCredentials(credentials: Array<UserCredential>){
+        const userId = await this.getCurrentUserId();
+        return await pubkeys.set(userId, toBase64Url(marshal(credentials)));
+    }
+
+    async generateChallenge(){
         return safeDecode(crypto.getRandomValues(new Uint8Array(16)))
     }
 }
