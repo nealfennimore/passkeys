@@ -1,6 +1,6 @@
-import { concatBuffer, decode, marshal, WebAuthnType } from "../../utils.js";
-import { Context } from '../context';
-import { Crypto, Digests, SigningAlg } from '../crypto.js';
+import { concatBuffer, decode, marshal, WebAuthnType } from "../utils.js";
+import { Context } from './context';
+import { Crypto, Digests, SigningAlg } from './crypto.js';
 
 export class Assertion {
     private static async verify(pubKey: CryptoKey, assertion: AuthenticatorAssertionResponse) {
@@ -52,7 +52,7 @@ export class Assertion {
         }
         
         const credentials = await ctx.getCredentials();
-        if (!credentials.length){
+        if (!credentials?.length){
             throw new Error("No credentials found");
         }
         
@@ -61,9 +61,7 @@ export class Assertion {
             return await Assertion.verify(key, response);
         });
 
-        if (isVerified){
-            ctx.setChallenge(WebAuthnType.Get, null);
-        }
+        ctx.deleteChallenge(WebAuthnType.Get);
 
         return new Response(marshal({isVerified}), {
             headers: {

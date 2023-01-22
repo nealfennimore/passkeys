@@ -1,5 +1,9 @@
-export const encode = new TextEncoder().encode;
-export const decode = new TextDecoder().decode;
+import { decode as _fromBase64Url, encode as _toBase64Url } from '@cfworker/base64url';
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+export const encode = encoder.encode.bind(encoder);
+export const decode = decoder.decode.bind(decoder);
 
 // From: https://github.com/joaquimserafim/base64-url/blob/master/index.js
 export function unescape (str: string) {
@@ -18,8 +22,8 @@ export function escape (str: string) {
 export const marshal = JSON.stringify
 export const unmarshal = JSON.parse
 
-export const toBase64Url = (str: string)=> escape(btoa(str))
-export const fromBase64Url = (str: string) => atob(unescape(str))
+export const toBase64Url = _toBase64Url;
+export const fromBase64Url = _fromBase64Url;
 
 export const safeEncode = (data: string) => encode(fromBase64Url(data));
 export const safeDecode = (data: ArrayBuffer) => toBase64Url(decode(data));

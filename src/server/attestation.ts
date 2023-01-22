@@ -1,16 +1,15 @@
-import { decode, marshal, WebAuthnType } from "../../utils.js";
-import { Context } from '../context.js';
-import { Crypto } from '../crypto.js';
+import { decode, marshal, WebAuthnType } from "../utils.js";
+import { Context } from './context.js';
+import { Crypto } from './crypto.js';
 
 export class Attestation {
     static async generateUser(ctx: Context, userId: string){
+        console.log(userId);
         const sessionId = crypto.randomUUID();
-        const challenge = await ctx.generateChallenge();
-
-        await Promise.all([
-            ctx.setChallenge(WebAuthnType.Create, challenge),
-            ctx.setCurrentUserId(sessionId, userId)
-        ]);
+        const challenge = ctx.generateChallenge();
+        
+        await ctx.setCurrentUserId(sessionId, userId);
+        await ctx.setChallenge(WebAuthnType.Create, challenge);
         
         return new Response(marshal({challenge}), {
             headers: {
@@ -38,7 +37,7 @@ export class Attestation {
         }
 
         await Promise.all([
-            ctx.setChallenge(WebAuthnType.Create, null),
+            ctx.deleteChallenge(WebAuthnType.Create),
             ctx.setCredentials(
                 [{
                     kid: credential.id,
