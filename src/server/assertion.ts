@@ -1,6 +1,6 @@
+import { Crypto, Digests, SigningAlg } from '../crypto';
 import { concatBuffer, decode, WebAuthnType } from '../utils';
 import { Context } from './context';
-import { Crypto, Digests, SigningAlg } from './crypto';
 import * as response from './response';
 
 export class Assertion {

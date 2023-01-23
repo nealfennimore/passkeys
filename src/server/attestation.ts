@@ -1,6 +1,6 @@
+import { Crypto } from '../crypto';
 import { decode, WebAuthnType } from '../utils';
 import { Context } from './context';
-import { Crypto } from './crypto';
 import * as response from './response';
 
 export class Attestation {

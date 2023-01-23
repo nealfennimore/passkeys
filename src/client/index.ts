@@ -1,5 +1,5 @@
-import * as server from '../server/api.js';
 import { encode } from '../utils.js';
+import * as api from './api';
 
 export enum COSEAlgorithm {
     ES256 = -7,
@@ -10,12 +10,16 @@ export enum COSEAlgorithm {
     RS512 = -259,
 }
 
-if (window.PublicKeyCredential  
-    && await PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable?.() 
+if (
+    window.PublicKeyCredential &&
+    (await PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable?.())
     // && await PublicKeyCredential?.isConditionalMediationAvailable?.())
-){
-    async function attestation(abortController: AbortController, username: string){
-        const { userId, challenge } = await server.API.Attestation.generateUser();
+) {
+    async function attestation(
+        abortController: AbortController,
+        userId: string
+    ) {
+        const { challenge } = await api.Attestation.generate(userId);
         const publicKey: PublicKeyCredentialCreationOptions = {
             challenge: encode(challenge),
             rp: {
@@ -24,59 +28,70 @@ if (window.PublicKeyCredential
             },
             user: {
                 id: encode(userId),
-                name: username,
-                displayName: username,
+                name: userId,
+                displayName: userId,
             },
-            pubKeyCredParams: [{
-                type: "public-key",
-                alg: COSEAlgorithm.ES256,
-            }],
+            pubKeyCredParams: [
+                {
+                    type: 'public-key',
+                    alg: COSEAlgorithm.ES256,
+                },
+            ],
             authenticatorSelection: {
                 userVerification: 'preferred',
-                residentKey: 'required'
+                residentKey: 'required',
             },
             attestation: 'indirect',
             timeout: 60_000,
         };
-        
-        const credential = await window.navigator.credentials.create({
+
+        const credential = (await window.navigator.credentials.create({
             publicKey,
             signal: abortController.signal,
-        }) as PublicKeyCredential;
-        await server.API.Attestation.storeCredential(credential);
+        })) as PublicKeyCredential;
+        await api.Attestation.store(credential);
     }
 
     async function assertion(abortController: AbortController) {
-        const challenge = await server.API.Assertion.generateChallengeForCurrentUser();
+        const { challenge } = await api.Assertion.generate();
         const publicKey: PublicKeyCredentialRequestOptions = {
             challenge: encode(challenge),
             rpId: window.location.host,
             timeout: 60_000,
         };
-        const credential = await window.navigator.credentials.get({
+        const credential = (await window.navigator.credentials.get({
             publicKey,
             signal: abortController.signal,
             mediation: 'optional',
-        }) as PublicKeyCredential;
-        await server.API.Assertion.verifyCredential(credential);
+        })) as PublicKeyCredential;
+        return await api.Assertion.verify(credential);
     }
 
     const cancelButton = document.querySelector('button#cancel');
 
-    document.querySelector('form#attestation')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = new FormData(e.target as HTMLFormElement);
-        const abortController = new AbortController();
-        cancelButton?.addEventListener('click', abortController.abort, { once: true, signal: abortController.signal});
-        await attestation(abortController, data.get('username') as string)
-        abortController.abort();
-    });
-    document.querySelector('form#assertion')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const abortController = new AbortController();
-        cancelButton?.addEventListener('click', abortController.abort, { once: true, signal: abortController.signal});
-        await assertion(abortController);
-        abortController.abort();
-    });
+    document
+        .querySelector('form#attestation')
+        ?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = new FormData(e.target as HTMLFormElement);
+            const abortController = new AbortController();
+            cancelButton?.addEventListener('click', abortController.abort, {
+                once: true,
+                signal: abortController.signal,
+            });
+            await attestation(abortController, data.get('username') as string);
+            abortController.abort();
+        });
+    document
+        .querySelector('form#assertion')
+        ?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const abortController = new AbortController();
+            cancelButton?.addEventListener('click', abortController.abort, {
+                once: true,
+                signal: abortController.signal,
+            });
+            await assertion(abortController);
+            abortController.abort();
+        });
 }
-
