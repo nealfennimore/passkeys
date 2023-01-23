@@ -1,21 +1,20 @@
-import { decode, marshal, WebAuthnType } from "../utils.js";
-import { Context } from './context.js';
-import { Crypto } from './crypto.js';
+import { decode, WebAuthnType } from "../utils";
+import { Context } from './context';
+import { Crypto } from './crypto';
+import * as response from './response';
 
 export class Attestation {
-    static async generateUser(ctx: Context, userId: string){
-        console.log(userId);
-        const sessionId = crypto.randomUUID();
+    static async generate(ctx: Context, userId: string){
+        const sessionId = ctx.sessionId;
+        if (!ctx.hasSession){
+            await ctx.setCurrentUserId(sessionId, userId);
+        }
+
         const challenge = ctx.generateChallenge();
-        
-        await ctx.setCurrentUserId(sessionId, userId);
         await ctx.setChallenge(WebAuthnType.Create, challenge);
         
-        return new Response(marshal({challenge}), {
-            headers: {
-                'Set-Cookie': `session_id=${sessionId}; Path=/; HttpOnly;`,
-                'content-type': 'application/json;charset=UTF-8',
-            }
+        return response.json({challenge}, {
+            'Set-Cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=None; Secure;`,
         });
     }
     

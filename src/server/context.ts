@@ -10,22 +10,36 @@ export interface StoredCredential {
 export class Context {
     private request: Request;
     private env: Env;
+    private _sessionId: string | null;
 
     constructor(request: Request, env: Env){
         this.request = request;
         this.env = env;
+        this._sessionId = null;
     }
 
     get sessionId() {
-        return this.request.headers.get('sessionId');
+        if (this._sessionId){
+            return this._sessionId;
+        }
+        this._sessionId = this.request.headers.get('sessionId') ?? crypto.randomUUID();
+        return this._sessionId
+    }
+
+    get hasSession() {
+        const sessionId = this.request.headers.get('sessionId');
+        if (!sessionId) {
+            return false;
+        }
+        return !! this.getUserId(sessionId);           
+    }
+
+    async getUserId(sessionId: string){
+        return await this.env.sessions.get(sessionId);
     }
 
     async getCurrentUserId(){
-        const sessionId = this.sessionId;
-        if (!sessionId) {
-            return null;
-        }
-        return await this.env.sessions.get(sessionId);
+        return await this.getUserId(this.sessionId);
     }
 
     async setCurrentUserId(sessionId: string, userId: string){
@@ -56,24 +70,29 @@ export class Context {
         return await this.env.challenges.delete(`${userId}:${type}`)
     }
 
-    async getCredentials(){
+    async getCredentials(userId: string){
+        return await this.env.pubkeys.get(userId);
+    }
+
+    async getCurrentCredentials(){
         const userId = await this.getCurrentUserId();
         if(!userId){
             return null;
         }
-        const creds = await this.env.pubkeys.get(userId);
-        if(!creds){
+        const credentials = await this.getCredentials(userId);
+        if(!credentials){
             return null;
         }
-        return unmarshal(fromBase64Url(creds)) as Array<StoredCredential>;
+        return unmarshal(fromBase64Url(credentials)) as Array<StoredCredential>;
     }
+
 
     async setCredentials(credentials: Array<StoredCredential>){
         const userId = await this.getCurrentUserId();
         if(!userId){
-            return null;
+            return;
         }
-        const storedCredentials = await this.getCredentials() ?? [];
+        const storedCredentials = await this.getCurrentCredentials() ?? [];
         const combinedCredentials = [...storedCredentials, ...credentials];
         return await this.env.pubkeys.put(userId, toBase64Url(marshal(combinedCredentials)), {expirationTtl: 60 * 60 * 24});
     }

@@ -1,6 +1,7 @@
-import { concatBuffer, decode, marshal, WebAuthnType } from "../utils.js";
+import { concatBuffer, decode, WebAuthnType } from "../utils";
 import { Context } from './context';
-import { Crypto, Digests, SigningAlg } from './crypto.js';
+import { Crypto, Digests, SigningAlg } from './crypto';
+import * as response from './response';
 
 export class Assertion {
     private static async verify(pubKey: CryptoKey, assertion: AuthenticatorAssertionResponse) {
@@ -30,16 +31,12 @@ export class Assertion {
     static async generateChallengeForCurrentUser(ctx: Context){
         const challenge = await ctx.generateChallenge();        
         await ctx.setChallenge(WebAuthnType.Get, challenge)
-        return new Response(marshal({challenge}), {
-            headers: {
-                'content-type': 'application/json;charset=UTF-8',
-            }
-        });
+        return response.json({challenge});
     }
 
     static async verifyCredential(ctx: Context, credential: PublicKeyCredential) {
-        const response = credential.response as AuthenticatorAssertionResponse;
-        const { clientDataJSON } = response;
+        const r = credential.response as AuthenticatorAssertionResponse;
+        const { clientDataJSON } = r;
         const { challenge, type } = JSON.parse(decode(clientDataJSON))
 
         if (type !== WebAuthnType.Get) {
@@ -51,22 +48,18 @@ export class Assertion {
             throw new Error("Incorrect challenge");
         }
         
-        const credentials = await ctx.getCredentials();
+        const credentials = await ctx.getCurrentCredentials();
         if (!credentials?.length){
             throw new Error("No credentials found");
         }
         
         const isVerified = credentials.some(async ({jwk})=>{
             const key = await Crypto.fromJWK(jwk);
-            return await Assertion.verify(key, response);
+            return await Assertion.verify(key, r);
         });
 
-        ctx.deleteChallenge(WebAuthnType.Get);
+        await ctx.deleteChallenge(WebAuthnType.Get);
 
-        return new Response(marshal({isVerified}), {
-            headers: {
-                'content-type': 'application/json;charset=UTF-8',
-            }
-        });
+        return response.json({isVerified});
     }
 }
