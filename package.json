@@ -18,6 +18,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20221111.1",
     "gh-pages": "^4.0.0",
+    "prettier": "^2.8.3",
     "wrangler": "^2.7.1"
   },
   "dependencies": {
