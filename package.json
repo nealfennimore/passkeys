@@ -6,7 +6,7 @@
   "scripts": {
     "prepare": "npm run build",
     "prebuild": "rm -rf build",
-    "build:client": "tsc -noEmit && esbuild ./src/client/index.ts --bundle --minify --outdir=build",
+    "build:client": "tsc -noEmit && esbuild ./src/client/index.ts --bundle --minify --sourcemap --format=esm --outdir=build",
     "build": "npm run build:client",
     "postbuild": "./scripts/make-assets.sh",
     "watch": "tsc --watch",
