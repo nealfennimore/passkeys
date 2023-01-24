@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Passkeys</title>
 
-    <script defer type="module" src="/784f3ab9ffaf6087fd1291ed60d9b330b60bad79391be9768d40782d1c22c2c9.bundle.js"></script>
+    <script defer type="module" src="/3a85c184a62ee2ed3db63982dc650080401eee0ea0e74155adf69bc7132b3785.bundle.js"></script>
 
 </head>
 
@@ -16,14 +16,17 @@
     <form id="passkeys">
         <fieldset>
             <label for="username">Username</label>
-            <input type="text" name="username" placeholder="Username" autocomplete="username webauthn">
+            <input type="text" name="username" placeholder="Username" autocomplete="username webauthn" required>
         </fieldset>
     
-        <button type="submit" id="signup">
+        <button type="button" id="signup">
             <span>Signup</span>
         </button>
-        <button type="submit" id="login">
+        <button type="button" id="login">
             <span>Login</span>
+        </button>
+        <button type="button" id="cancel">
+            <span>Cancel</span>
         </button>
     </form>
 
