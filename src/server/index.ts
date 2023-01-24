@@ -55,8 +55,7 @@ router.options('*', function handleOptions(request) {
     }
 });
 
-router.post('*', withContext);
-router.post('/attestation/generate', async (request) => {
+router.post('/attestation/generate', withContext, async (request) => {
     try {
         const data =
             (await request.json()) as schema.Attestation.ChallengePayload;
@@ -70,21 +69,26 @@ router.post('/attestation/generate', async (request) => {
     }
 });
 
-router.post('/attestation/store', requiresSession, async (request) => {
-    try {
-        const data =
-            (await request.json()) as schema.Attestation.StoreCredentialPayload;
-        return await Attestation.storeCredential(request.ctx, data);
-    } catch (err: any) {
-        return response.json(
-            { error: err?.message },
-            undefined,
-            err.statusCode
-        );
+router.post(
+    '/attestation/store',
+    withContext,
+    requiresSession,
+    async (request) => {
+        try {
+            const data =
+                (await request.json()) as schema.Attestation.StoreCredentialPayload;
+            return await Attestation.storeCredential(request.ctx, data);
+        } catch (err: any) {
+            return response.json(
+                { error: err?.message },
+                undefined,
+                err.statusCode
+            );
+        }
     }
-});
+);
 
-router.post('/assertion/generate', requiresSession, async (request) => {
+router.post('/assertion/generate', withContext, async (request) => {
     try {
         const data =
             (await request.json()) as schema.Assertion.ChallengePayload;
@@ -98,18 +102,24 @@ router.post('/assertion/generate', requiresSession, async (request) => {
     }
 });
 
-router.post('/assertion/verify', requiresSession, async (request) => {
-    try {
-        const data = (await request.json()) as schema.Assertion.VerifyPayload;
-        return await Assertion.verifyCredential(request.ctx, data);
-    } catch (err: any) {
-        return response.json(
-            { error: err?.message },
-            undefined,
-            err.statusCode
-        );
+router.post(
+    '/assertion/verify',
+    withContext,
+    requiresSession,
+    async (request) => {
+        try {
+            const data =
+                (await request.json()) as schema.Assertion.VerifyPayload;
+            return await Assertion.verifyCredential(request.ctx, data);
+        } catch (err: any) {
+            return response.json(
+                { error: err?.message },
+                undefined,
+                err.statusCode
+            );
+        }
     }
-});
+);
 
 export default {
     fetch: router.handle,
