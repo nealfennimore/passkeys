@@ -22,8 +22,9 @@ const requiresSession = (request: IRequest, env: Env) => {
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': 'https://passkeys.neal.codes',
-    'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
+    'Access-Control-Allow-Methods': 'POST,OPTIONS',
     'Access-Control-Max-Age': '86400',
+    'Access-Control-Allow-Credentials': 'true',
 };
 
 router.options('*', function handleOptions(request) {
@@ -55,7 +56,7 @@ router.options('*', function handleOptions(request) {
         // If you want to allow other HTTP Methods, you can do that here.
         return new Response(null, {
             headers: {
-                Allow: 'GET, HEAD, POST, OPTIONS',
+                Allow: 'POST, OPTIONS',
             },
         });
     }
