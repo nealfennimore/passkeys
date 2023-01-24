@@ -26,7 +26,7 @@ if (
             pubKeyCredParams: [
                 {
                     type: 'public-key',
-                    alg: COSEAlgorithm.ES256,
+                    alg: COSEAlgorithm.ES512,
                 },
                 {
                     type: 'public-key',
@@ -34,7 +34,7 @@ if (
                 },
                 {
                     type: 'public-key',
-                    alg: COSEAlgorithm.ES512,
+                    alg: COSEAlgorithm.ES256,
                 },
             ],
             authenticatorSelection: {
@@ -49,7 +49,7 @@ if (
             publicKey,
             signal: abortController.signal,
         })) as PublicKeyCredential;
-        await api.Attestation.store(credential);
+        return await api.Attestation.store(credential);
     }
 
     async function assertion(abortController: AbortController, userId: string) {
