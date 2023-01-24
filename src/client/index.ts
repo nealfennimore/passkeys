@@ -1,13 +1,6 @@
+import { COSEAlgorithm } from '../crypto.js';
 import { encode } from '../utils.js';
 import * as api from './api.js';
-export enum COSEAlgorithm {
-    ES256 = -7,
-    ES384 = -35,
-    ES512 = -36,
-    RS256 = -257,
-    RS384 = -258,
-    RS512 = -259,
-}
 
 if (
     window.PublicKeyCredential // &&
@@ -34,6 +27,14 @@ if (
                 {
                     type: 'public-key',
                     alg: COSEAlgorithm.ES256,
+                },
+                {
+                    type: 'public-key',
+                    alg: COSEAlgorithm.ES384,
+                },
+                {
+                    type: 'public-key',
+                    alg: COSEAlgorithm.ES512,
                 },
             ],
             authenticatorSelection: {

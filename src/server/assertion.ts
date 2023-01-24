@@ -1,4 +1,4 @@
-import { Crypto, Digests, SigningAlg } from '../crypto';
+import { Crypto, JwkAlg, JwkAlgToDigest, JwkAlgToSigningAlg } from '../crypto';
 import {
     concatBuffer,
     fromBase64Url,
@@ -12,9 +12,13 @@ import * as schema from './schema';
 
 export class Assertion {
     private static async verify(
-        pubKey: CryptoKey,
+        jwk: JsonWebKey,
         payload: schema.Assertion.VerifyPayload
     ) {
+        const pubKey = await Crypto.fromJWK(jwk);
+        const signingAlg = JwkAlgToSigningAlg[jwk.alg as JwkAlg];
+        const hashAlg = JwkAlgToDigest[jwk.alg as JwkAlg];
+
         const signature = safeEncode(payload.signature);
         const authenticatorData = safeEncode(payload.authenticatorData);
         const clientDataJSON = safeEncode(payload.clientDataJSON);
@@ -28,11 +32,11 @@ export class Assertion {
 
         const digest = concatBuffer(
             authenticatorData,
-            await crypto.subtle.digest(Digests.SHA256, clientDataJSON)
+            await crypto.subtle.digest(hashAlg, clientDataJSON)
         );
 
         return await crypto.subtle.verify(
-            { name: SigningAlg.ECDSA, hash: { name: Digests.SHA256 } },
+            { name: signingAlg, hash: { name: hashAlg } },
             pubKey,
             rawSig,
             digest
@@ -85,8 +89,7 @@ export class Assertion {
             if (kid !== storedKid) {
                 return false;
             }
-            const key = await Crypto.fromJWK(jwk);
-            return await Assertion.verify(key, payload);
+            return await Assertion.verify(jwk, payload);
         });
 
         await ctx.deleteChallenge(WebAuthnType.Get);

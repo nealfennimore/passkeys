@@ -1,4 +1,8 @@
-import { Crypto } from '../crypto.js';
+import {
+    COSEAlgToSigningAlg,
+    COSEAlgToSigningCurve,
+    Crypto,
+} from '../crypto.js';
 import * as schema from '../server/schema.js';
 import { safeDecode } from '../utils.js';
 
@@ -32,7 +36,13 @@ export namespace Attestation {
             attestationObject: safeDecode(attestation.attestationObject),
             jwk: await Crypto.toJWK(
                 await Crypto.toCryptoKey(
-                    attestation.getPublicKey() as ArrayBuffer
+                    attestation.getPublicKey() as ArrayBuffer,
+                    COSEAlgToSigningAlg[
+                        `${attestation.getPublicKeyAlgorithm()}`
+                    ],
+                    COSEAlgToSigningCurve[
+                        `${attestation.getPublicKeyAlgorithm()}`
+                    ]
                 )
             ),
         };
