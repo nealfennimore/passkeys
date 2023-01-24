@@ -1,41 +1,40 @@
-import { decode } from "../utils.js";
-import { Cache, Context } from './context.js';
-import { Crypto } from './crypto.js';
+import { fromBase64Url, unmarshal, WebAuthnType } from '../utils';
+import * as response from './response';
 export class Attestation {
-    static async generateUser() {
-        const userId = window.crypto.randomUUID();
-        const challenge = await Context.generateChallenge();
-        const credentials = {
-            userId,
-            challenge,
-        };
-        Cache.store('currentUserId', userId);
-        Cache.store(userId, credentials);
-        return credentials;
-    }
-    static async storeCredential(credential) {
-        const response = credential.response;
-        const { clientDataJSON } = response;
-        const pubKey = response.getPublicKey();
-        const { challenge, type } = JSON.parse(decode(clientDataJSON));
-        if (type !== 'webauthn.create') {
-            throw new Error("Wrong credential type");
+    static async generate(ctx, userId) {
+        const sessionId = ctx.sessionId;
+        if (!ctx.hasSession) {
+            await ctx.setCurrentUserId(sessionId, userId);
         }
-        const currentCredentials = await Context.getCredentials();
-        const { credentials = [], challenge: storedChallenge } = currentCredentials;
-        if (challenge !== storedChallenge) {
-            throw new Error("Incorrect challenge");
-        }
-        Cache.store(currentCredentials.userId, {
-            ...currentCredentials,
-            credentials: [
-                ...credentials,
-                {
-                    kid: credential.id,
-                    jwk: await Crypto.toJWK(await Crypto.toCryptoKey(pubKey))
-                }
-            ]
+        const challenge = ctx.generateChallenge();
+        await ctx.setChallenge(WebAuthnType.Create, challenge);
+        return response.json({ challenge }, {
+            'Set-Cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=None; Secure;`,
         });
+    }
+    static async storeCredential(ctx, payload) {
+        const { clientDataJSON, kid, jwk } = payload;
+        const { challenge, type } = unmarshal(fromBase64Url(clientDataJSON));
+        if (type !== WebAuthnType.Create) {
+            throw new Error('Wrong credential type');
+        }
+        const storedChallenge = await ctx.getChallenge(type);
+        if (storedChallenge !== null && challenge !== storedChallenge) {
+            throw new Error('Incorrect challenge');
+        }
+        await Promise.all([
+            ctx.deleteChallenge(WebAuthnType.Create),
+            ctx.setCredentials([
+                {
+                    kid,
+                    jwk,
+                },
+            ]),
+        ]);
+        const data = {
+            kid,
+        };
+        return response.json(data);
     }
 }
 //# sourceMappingURL=attestation.js.map

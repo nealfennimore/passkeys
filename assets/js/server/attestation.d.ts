@@ -1,5 +1,6 @@
-import { UserCredentialCache } from './context.js';
+import { Context } from './context';
+import * as schema from './schema';
 export declare class Attestation {
-    static generateUser(): Promise<UserCredentialCache>;
-    static storeCredential(credential: PublicKeyCredential): Promise<void>;
+    static generate(ctx: Context, userId: string): Promise<Response>;
+    static storeCredential(ctx: Context, payload: schema.Attestation.StoreCredentialPayload): Promise<Response>;
 }
