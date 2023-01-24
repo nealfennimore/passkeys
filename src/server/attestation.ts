@@ -36,7 +36,10 @@ export class Attestation {
 
         const storedChallenge = await ctx.getChallenge(WebAuthnType.Create);
 
-        if (storedChallenge === null || challenge !== storedChallenge) {
+        if (
+            storedChallenge === null ||
+            fromBase64Url(challenge) !== storedChallenge
+        ) {
             throw new Error('Incorrect challenge');
         }
 
