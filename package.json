@@ -6,17 +6,20 @@
   "scripts": {
     "prepare": "npm run build",
     "prebuild": "rm -rf build",
-    "build": "tsc --build",
+    "build:client": "tsc -noEmit && esbuild ./src/client/index.ts --bundle --minify --outdir=build",
+    "build": "npm run build:client",
+    "postbuild": "./scripts/make-assets.sh",
     "watch": "tsc --watch",
     "start": "wrangler dev",
     "publish": "wrangler publish",
-    "predeploy": "npm run build && cp src/assets/* build/",
+    "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
   "author": "Neal Fennimore",
   "license": "MIT",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20221111.1",
+    "esbuild": "^0.17.4",
     "gh-pages": "^4.0.0",
     "prettier": "^2.8.3",
     "wrangler": "^2.7.1"
