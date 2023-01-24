@@ -52,8 +52,8 @@ if (
         await api.Attestation.store(credential);
     }
 
-    async function assertion(abortController: AbortController) {
-        const { challenge } = await api.Assertion.generate();
+    async function assertion(abortController: AbortController, userId: string) {
+        const { challenge } = await api.Assertion.generate(userId);
         const publicKey: PublicKeyCredentialRequestOptions = {
             challenge: encode(challenge),
             rpId: window.location.host,
@@ -70,8 +70,8 @@ if (
     const cancelButton = document.querySelector('button#cancel');
 
     document
-        .querySelector('form#attestation')
-        ?.addEventListener('submit', async (e) => {
+        .querySelector('form#passkeys button#signup')
+        ?.addEventListener('click', async (e) => {
             e.preventDefault();
             const data = new FormData(e.target as HTMLFormElement);
             const abortController = new AbortController();
@@ -82,9 +82,10 @@ if (
             await attestation(abortController, data.get('username') as string);
             abortController.abort();
         });
+
     document
-        .querySelector('form#assertion')
-        ?.addEventListener('submit', async (e) => {
+        .querySelector('form#passkeys button#login')
+        ?.addEventListener('click', async (e) => {
             e.preventDefault();
             const data = new FormData(e.target as HTMLFormElement);
             const abortController = new AbortController();
@@ -92,7 +93,7 @@ if (
                 once: true,
                 signal: abortController.signal,
             });
-            await assertion(abortController);
+            await assertion(abortController, data.get('username') as string);
             abortController.abort();
         });
 }

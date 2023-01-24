@@ -13,27 +13,19 @@
 
 <body>
 
-    <form id="attestation">
-        <fieldset>
-            <label for="username">Username</label>
-            <input type="text" name="username" placeholder="Username">
-        </fieldset>
-    
-        <button type="submit">
-            <span>Signup</span>
-        </button>
-    </form>
-    <form id="assertion">
+    <form id="passkeys">
         <fieldset>
             <label for="username">Username</label>
             <input type="text" name="username" placeholder="Username" autocomplete="username webauthn">
         </fieldset>
     
-        <button type="submit">
+        <button type="submit" id="signup">
+            <span>Signup</span>
+        </button>
+        <button type="submit" id="login">
             <span>Login</span>
         </button>
     </form>
-
 
 </body>
 
