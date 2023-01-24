@@ -16,14 +16,17 @@
     <form id="passkeys">
         <fieldset>
             <label for="username">Username</label>
-            <input type="text" name="username" placeholder="Username" autocomplete="username webauthn">
+            <input type="text" name="username" placeholder="Username" autocomplete="username webauthn" required>
         </fieldset>
     
-        <button type="submit" id="signup">
+        <button type="button" id="signup">
             <span>Signup</span>
         </button>
-        <button type="submit" id="login">
+        <button type="button" id="login">
             <span>Login</span>
+        </button>
+        <button type="button" id="cancel">
+            <span>Cancel</span>
         </button>
     </form>
 

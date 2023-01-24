@@ -69,31 +69,25 @@ if (
 
     const cancelButton = document.querySelector('button#cancel');
 
+    const submit = (fn: CallableFunction) => async (e: Event) => {
+        e.preventDefault();
+        const data = new FormData(
+            document.querySelector('form#passkeys') as HTMLFormElement
+        );
+        const abortController = new AbortController();
+        cancelButton?.addEventListener('click', abortController.abort, {
+            once: true,
+            signal: abortController.signal,
+        });
+        await fn(abortController, data.get('username') as string);
+        abortController.abort();
+    };
+
     document
         .querySelector('form#passkeys button#signup')
-        ?.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const data = new FormData(e.target as HTMLFormElement);
-            const abortController = new AbortController();
-            cancelButton?.addEventListener('click', abortController.abort, {
-                once: true,
-                signal: abortController.signal,
-            });
-            await attestation(abortController, data.get('username') as string);
-            abortController.abort();
-        });
+        ?.addEventListener('click', submit(attestation));
 
     document
         .querySelector('form#passkeys button#login')
-        ?.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const data = new FormData(e.target as HTMLFormElement);
-            const abortController = new AbortController();
-            cancelButton?.addEventListener('click', abortController.abort, {
-                once: true,
-                signal: abortController.signal,
-            });
-            await assertion(abortController, data.get('username') as string);
-            abortController.abort();
-        });
+        ?.addEventListener('click', submit(assertion));
 }
