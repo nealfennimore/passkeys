@@ -1,4 +1,5 @@
 import { Request } from '@cloudflare/workers-types';
+import { parse } from 'cookie';
 import {
     fromBase64Url,
     marshal,
@@ -12,6 +13,10 @@ export interface StoredCredential {
     kid: string;
     jwk: JsonWebKey;
 }
+
+type Cookie = {
+    session_id?: string;
+};
 
 export class Context {
     private request: Request;
@@ -28,13 +33,17 @@ export class Context {
         if (this._sessionId) {
             return this._sessionId;
         }
-        this._sessionId =
-            this.request.headers.get('sessionId') ?? crypto.randomUUID();
+        this._sessionId = this.cookieSessionId ?? crypto.randomUUID();
         return this._sessionId;
     }
 
+    get cookieSessionId() {
+        const cookie = parse(this.request.headers.get('Cookie') ?? '');
+        return cookie.session_id || null;
+    }
+
     get hasSession() {
-        const sessionId = this.request.headers.get('sessionId');
+        const sessionId = this.cookieSessionId;
         if (!sessionId) {
             return false;
         }
