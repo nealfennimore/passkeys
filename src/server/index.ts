@@ -21,7 +21,7 @@ const requiresSession = (request: IRequest, env: Env) => {
 };
 
 const corsHeaders = {
-    'Access-Control-Allow-Origin': 'passkeys.neal.codes',
+    'Access-Control-Allow-Origin': 'https://passkeys.neal.codes',
     'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
     'Access-Control-Max-Age': '86400',
 };
