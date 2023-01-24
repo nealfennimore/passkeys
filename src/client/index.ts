@@ -68,6 +68,9 @@ if (
     }
 
     const cancelButton = document.querySelector('button#cancel');
+    const output = document.querySelector(
+        'textarea#output'
+    ) as HTMLTextAreaElement;
 
     const submit = (fn: CallableFunction) => async (e: Event) => {
         e.preventDefault();
@@ -79,7 +82,13 @@ if (
             once: true,
             signal: abortController.signal,
         });
-        await fn(abortController, data.get('username') as string);
+        const response = await fn(
+            abortController,
+            data.get('username') as string
+        );
+        if (output) {
+            output.value = JSON.stringify(response, undefined, 4);
+        }
         abortController.abort();
     };
 
