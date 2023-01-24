@@ -20,13 +20,6 @@ const requiresSession = (request: IRequest, env: Env) => {
     }
 };
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://passkeys.neal.codes',
-    'Access-Control-Allow-Methods': 'POST,OPTIONS',
-    'Access-Control-Max-Age': '86400',
-    'Access-Control-Allow-Credentials': 'true',
-};
-
 router.options('*', function handleOptions(request) {
     // Make sure the necessary headers are present
     // for this to be a valid pre-flight request
@@ -40,7 +33,7 @@ router.options('*', function handleOptions(request) {
         // If you want to check or reject the requested method + headers
         // you can do that here.
         let respHeaders = {
-            ...corsHeaders,
+            ...response.corsHeaders,
             // Allow all future content Request headers to go back to browser
             // such as Authorization (Bearer) or X-Client-Name-Version
             'Access-Control-Allow-Headers': request.headers.get(
