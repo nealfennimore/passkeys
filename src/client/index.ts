@@ -11,8 +11,8 @@ export enum COSEAlgorithm {
 }
 
 if (
-    window.PublicKeyCredential &&
-    (await PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable?.())
+    window.PublicKeyCredential // &&
+    // (await PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable?.())
     // && await PublicKeyCredential?.isConditionalMediationAvailable?.())
 ) {
     async function attestation(
