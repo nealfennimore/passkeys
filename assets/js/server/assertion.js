@@ -23,7 +23,7 @@ export class Assertion {
             throw new Error('Wrong credential type');
         }
         const storedChallenge = await ctx.getChallenge(WebAuthnType.Get);
-        if (storedChallenge !== null && challenge !== storedChallenge) {
+        if (storedChallenge === null || challenge !== storedChallenge) {
             throw new Error('Incorrect challenge');
         }
         const credentials = await ctx.getCurrentCredentials();

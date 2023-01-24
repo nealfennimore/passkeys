@@ -18,8 +18,8 @@ export class Attestation {
         if (type !== WebAuthnType.Create) {
             throw new Error('Wrong credential type');
         }
-        const storedChallenge = await ctx.getChallenge(type);
-        if (storedChallenge !== null && challenge !== storedChallenge) {
+        const storedChallenge = await ctx.getChallenge(WebAuthnType.Create);
+        if (storedChallenge === null || challenge !== storedChallenge) {
             throw new Error('Incorrect challenge');
         }
         await Promise.all([
