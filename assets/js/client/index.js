@@ -9,8 +9,7 @@ export var COSEAlgorithm;
     COSEAlgorithm[COSEAlgorithm["RS384"] = -258] = "RS384";
     COSEAlgorithm[COSEAlgorithm["RS512"] = -259] = "RS512";
 })(COSEAlgorithm || (COSEAlgorithm = {}));
-if (window.PublicKeyCredential &&
-    (await PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable?.())) {
+if (window.PublicKeyCredential) {
     async function attestation(abortController, userId) {
         const { challenge } = await api.Attestation.generate(userId);
         const publicKey = {
