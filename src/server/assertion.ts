@@ -63,37 +63,41 @@ export class Assertion {
         ctx: Context,
         payload: schema.Assertion.VerifyPayload
     ) {
-        const { clientDataJSON, kid } = payload;
-        const { challenge, type } = unmarshal(
-            fromBase64Url(clientDataJSON)
-        ) as schema.ClientDataJSON;
+        try {
+            const { clientDataJSON, kid } = payload;
+            const { challenge, type } = unmarshal(
+                fromBase64Url(clientDataJSON)
+            ) as schema.ClientDataJSON;
 
-        if (type !== WebAuthnType.Get) {
-            throw new Error('Wrong credential type');
-        }
-
-        const storedChallenge = await ctx.getChallenge(WebAuthnType.Get);
-        if (
-            storedChallenge === null ||
-            fromBase64Url(challenge) !== storedChallenge
-        ) {
-            throw new Error('Incorrect challenge');
-        }
-
-        const credentials = await ctx.getCurrentCredentials();
-        if (!credentials?.length) {
-            throw new Error('No credentials found');
-        }
-
-        const isVerified = credentials.some(async ({ kid: storedKid, jwk }) => {
-            if (kid !== storedKid) {
-                return false;
+            if (type !== WebAuthnType.Get) {
+                throw new Error('Wrong credential type');
             }
-            return await Assertion.verify(jwk, payload);
-        });
 
-        await ctx.deleteChallenge(WebAuthnType.Get);
+            const storedChallenge = await ctx.getChallenge(WebAuthnType.Get);
+            if (storedChallenge === null) {
+                throw new Error('Must regenerate challenge');
+            }
 
-        return response.json({ isVerified });
+            if (fromBase64Url(challenge) !== storedChallenge) {
+                throw new Error('Incorrect challenge');
+            }
+
+            const credentials = await ctx.getCurrentCredentials();
+            if (!credentials?.length) {
+                throw new Error('No credentials found');
+            }
+
+            const isVerified = credentials.some(
+                async ({ kid: storedKid, jwk }) => {
+                    if (kid !== storedKid) {
+                        return false;
+                    }
+                    return await Assertion.verify(jwk, payload);
+                }
+            );
+            return response.json({ isVerified });
+        } finally {
+            ctx.deleteChallenge(WebAuthnType.Get);
+        }
     }
 }

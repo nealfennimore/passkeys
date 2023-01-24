@@ -24,36 +24,38 @@ export class Attestation {
         ctx: Context,
         payload: schema.Attestation.StoreCredentialPayload
     ) {
-        const { clientDataJSON, kid, jwk } = payload;
-        const { challenge, type } = unmarshal(
-            fromBase64Url(clientDataJSON)
-        ) as schema.ClientDataJSON;
+        try {
+            const { clientDataJSON, kid, jwk } = payload;
+            const { challenge, type } = unmarshal(
+                fromBase64Url(clientDataJSON)
+            ) as schema.ClientDataJSON;
 
-        if (type !== WebAuthnType.Create) {
-            throw new Error('Wrong credential type');
-        }
+            if (type !== WebAuthnType.Create) {
+                throw new Error('Wrong credential type');
+            }
 
-        const storedChallenge = await ctx.getChallenge(WebAuthnType.Create);
+            const storedChallenge = await ctx.getChallenge(WebAuthnType.Create);
+            if (storedChallenge === null) {
+                throw new Error('Must regenerate challenge');
+            }
 
-        if (
-            storedChallenge === null ||
-            fromBase64Url(challenge) !== storedChallenge
-        ) {
-            throw new Error('Incorrect challenge');
-        }
+            if (fromBase64Url(challenge) !== storedChallenge) {
+                throw new Error('Incorrect challenge');
+            }
 
-        await Promise.all([
-            ctx.deleteChallenge(WebAuthnType.Create),
-            ctx.setCredentials([
+            await ctx.setCredentials([
                 {
                     kid,
                     jwk,
                 },
-            ]),
-        ]);
-        const data = {
-            kid,
-        } as schema.Attestation.StoreCredentialResponse;
-        return response.json(data);
+            ]);
+
+            const data = {
+                kid,
+            } as schema.Attestation.StoreCredentialResponse;
+            return response.json(data);
+        } finally {
+            ctx.deleteChallenge(WebAuthnType.Create);
+        }
     }
 }
