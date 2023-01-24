@@ -1,5 +1,5 @@
 import { COSEAlgorithm } from '../crypto.js';
-import { encode } from '../utils.js';
+import { encode, safeEncode } from '../utils.js';
 import * as api from './api.js';
 
 if (
@@ -13,7 +13,7 @@ if (
     ) {
         const { challenge } = await api.Attestation.generate(userId);
         const publicKey: PublicKeyCredentialCreationOptions = {
-            challenge: encode(challenge),
+            challenge: safeEncode(challenge),
             rp: {
                 id: window.location.host,
                 name: document.title,
@@ -86,6 +86,7 @@ if (
         .querySelector('form#assertion')
         ?.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const data = new FormData(e.target as HTMLFormElement);
             const abortController = new AbortController();
             cancelButton?.addEventListener('click', abortController.abort, {
                 once: true,

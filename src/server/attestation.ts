@@ -30,7 +30,7 @@ export class Attestation {
                 throw new Error('Must regenerate challenge');
             }
 
-            if (fromBase64Url(challenge) !== storedChallenge) {
+            if (challenge !== storedChallenge) {
                 throw new Error('Incorrect challenge');
             }
 
