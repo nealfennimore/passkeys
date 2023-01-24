@@ -46,7 +46,7 @@ export class Attestation {
             } as schema.Attestation.StoreCredentialResponse;
             return response.json(data);
         } finally {
-            ctx.deleteChallenge(WebAuthnType.Create);
+            await ctx.deleteChallenge(WebAuthnType.Create);
         }
     }
 }

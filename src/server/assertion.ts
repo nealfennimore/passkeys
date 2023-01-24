@@ -88,7 +88,7 @@ export class Assertion {
             );
             return response.json({ isVerified });
         } finally {
-            ctx.deleteChallenge(WebAuthnType.Get);
+            await ctx.deleteChallenge(WebAuthnType.Get);
         }
     }
 }
