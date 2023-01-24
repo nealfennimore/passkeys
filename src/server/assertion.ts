@@ -1,15 +1,23 @@
 import { Crypto, Digests, SigningAlg } from '../crypto';
-import { concatBuffer, decode, WebAuthnType } from '../utils';
+import {
+    concatBuffer,
+    fromBase64Url,
+    safeEncode,
+    unmarshal,
+    WebAuthnType,
+} from '../utils';
 import { Context } from './context';
 import * as response from './response';
+import * as schema from './schema';
 
 export class Assertion {
     private static async verify(
         pubKey: CryptoKey,
-        assertion: AuthenticatorAssertionResponse
+        payload: schema.Assertion.VerifyPayload
     ) {
-        // @ts-ignore
-        const { clientDataJSON, authenticatorData, signature } = assertion;
+        const signature = safeEncode(payload.signature);
+        const authenticatorData = safeEncode(payload.authenticatorData);
+        const clientDataJSON = safeEncode(payload.clientDataJSON);
 
         // Convert from DER ASN.1 encoding to Raw ECDSA signature
         const offset = new Uint8Array(signature)[4] === 0 ? 1 : 0;
@@ -39,11 +47,12 @@ export class Assertion {
 
     static async verifyCredential(
         ctx: Context,
-        credential: PublicKeyCredential
+        payload: schema.Assertion.VerifyPayload
     ) {
-        const r = credential.response as AuthenticatorAssertionResponse;
-        const { clientDataJSON } = r;
-        const { challenge, type } = JSON.parse(decode(clientDataJSON));
+        const { clientDataJSON, kid } = payload;
+        const { challenge, type } = unmarshal(
+            fromBase64Url(clientDataJSON)
+        ) as schema.ClientDataJSON;
 
         if (type !== WebAuthnType.Get) {
             throw new Error('Wrong credential type');
@@ -59,9 +68,12 @@ export class Assertion {
             throw new Error('No credentials found');
         }
 
-        const isVerified = credentials.some(async ({ jwk }) => {
+        const isVerified = credentials.some(async ({ kid: storedKid, jwk }) => {
+            if (kid !== storedKid) {
+                return false;
+            }
             const key = await Crypto.fromJWK(jwk);
-            return await Assertion.verify(key, r);
+            return await Assertion.verify(key, payload);
         });
 
         await ctx.deleteChallenge(WebAuthnType.Get);

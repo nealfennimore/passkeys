@@ -1,7 +1,7 @@
-import { Crypto } from '../crypto';
-import { decode, WebAuthnType } from '../utils';
+import { fromBase64Url, unmarshal, WebAuthnType } from '../utils';
 import { Context } from './context';
 import * as response from './response';
+import * as schema from './schema';
 
 export class Attestation {
     static async generate(ctx: Context, userId: string) {
@@ -23,19 +23,18 @@ export class Attestation {
 
     static async storeCredential(
         ctx: Context,
-        credential: PublicKeyCredential
+        payload: schema.Attestation.StoreCredentialPayload
     ) {
-        const r = credential.response as AuthenticatorAttestationResponse;
-        const { clientDataJSON } = r;
-        const pubKey = r.getPublicKey() as ArrayBuffer;
-
-        const { challenge, type } = JSON.parse(decode(clientDataJSON));
+        const { clientDataJSON, kid, jwk } = payload;
+        const { challenge, type } = unmarshal(
+            fromBase64Url(clientDataJSON)
+        ) as schema.ClientDataJSON;
 
         if (type !== WebAuthnType.Create) {
             throw new Error('Wrong credential type');
         }
 
-        const storedChallenge = ctx.getChallenge(type);
+        const storedChallenge = await ctx.getChallenge(type);
 
         if (storedChallenge !== null && challenge !== storedChallenge) {
             throw new Error('Incorrect challenge');
@@ -45,12 +44,14 @@ export class Attestation {
             ctx.deleteChallenge(WebAuthnType.Create),
             ctx.setCredentials([
                 {
-                    kid: credential.id,
-                    jwk: await Crypto.toJWK(await Crypto.toCryptoKey(pubKey)),
+                    kid,
+                    jwk,
                 },
             ]),
         ]);
-
-        return response.json({ kid: credential.id });
+        const data = {
+            kid,
+        } as schema.Attestation.StoreCredentialResponse;
+        return response.json(data);
     }
 }

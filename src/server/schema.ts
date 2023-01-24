@@ -2,6 +2,13 @@ type ChallengeResponseShared = {
     challenge: string;
 };
 
+export type ClientDataJSON = {
+    type: string;
+    challenge: string;
+    origin: string;
+    crossOrigin: boolean;
+};
+
 export namespace Attestation {
     export type ChallengePayload = {
         userId: string;

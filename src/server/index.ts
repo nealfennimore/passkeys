@@ -5,6 +5,7 @@ import { Attestation } from './attestation';
 import { Context } from './context';
 import { Env } from './env';
 import * as response from './response';
+import * as schema from './schema';
 
 const router = Router();
 
@@ -35,10 +36,9 @@ router.post('/attestation/generate', async (request) => {
 
 router.post('/attestation/store', requiresSession, async (request) => {
     try {
-        return await Attestation.storeCredential(
-            request.ctx,
-            request.cf.credential as PublicKeyCredential
-        );
+        const data =
+            (await request.json()) as schema.Attestation.StoreCredentialPayload;
+        return await Attestation.storeCredential(request.ctx, data);
     } catch (err: any) {
         return response.json(
             { error: err?.message },
@@ -62,10 +62,8 @@ router.post('/assertion/generate', requiresSession, async (request) => {
 
 router.post('/assertion/verify', requiresSession, async (request) => {
     try {
-        return await Assertion.verifyCredential(
-            request.ctx,
-            request.cf.credential as PublicKeyCredential
-        );
+        const data = (await request.json()) as schema.Assertion.VerifyPayload;
+        return await Assertion.verifyCredential(request.ctx, data);
     } catch (err: any) {
         return response.json(
             { error: err?.message },

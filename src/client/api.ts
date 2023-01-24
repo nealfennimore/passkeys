@@ -1,6 +1,6 @@
 import { Crypto } from '../crypto';
 import * as schema from '../server/schema';
-import { safeDecode } from '../utils';
+import { decode, safeDecode, unmarshal } from '../utils';
 
 const makeRequest = (endpoint: string, data: object = {}) =>
     fetch(
@@ -28,7 +28,7 @@ export namespace Attestation {
 
         const payload: schema.Attestation.StoreCredentialPayload = {
             kid: safeDecode(credential.rawId),
-            clientDataJSON: safeDecode(attestation.clientDataJSON),
+            clientDataJSON: unmarshal(decode(attestation.clientDataJSON)),
             attestationObject: safeDecode(attestation.attestationObject),
             jwk: await Crypto.toJWK(
                 await Crypto.toCryptoKey(
@@ -52,7 +52,7 @@ export namespace Assertion {
         const assertion = credential.response as AuthenticatorAssertionResponse;
         const payload: schema.Assertion.VerifyPayload = {
             kid: safeDecode(credential.rawId),
-            clientDataJSON: safeDecode(assertion.clientDataJSON),
+            clientDataJSON: unmarshal(decode(assertion.clientDataJSON)),
             authenticatorData: safeDecode(assertion.authenticatorData),
             signature: safeDecode(assertion.signature),
         };
