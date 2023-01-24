@@ -3,29 +3,30 @@ import { IRequest } from 'itty-router';
 import { Context } from './context';
 import { Env } from './env';
 import * as response from './response';
-import * as schema from './schema';
 
 export const withContext = (request: IRequest, env: Env) => {
     const ctx = new Context(request as unknown as Request, env);
     request.ctx = ctx;
 };
 
-export const setUserId = async (request: IRequest, env: Env) => {
-    const data = (await request.json()) as
-        | schema.Attestation.ChallengePayload
-        | schema.Assertion.ChallengePayload;
+export const setRequestBody = async (request: IRequest, env: Env) => {
+    const body = (await request.json()) as any;
+    request.ctx.body = body;
+};
 
-    if (!data.userId) {
+export const hasUserId = async (request: IRequest, env: Env) => {
+    if (!request.ctx?.body?.userId) {
         return response.json({ error: 'No user ID' }, undefined, 400);
     }
-
-    request.ctx.userId = data.userId;
 };
 
 export const maybeSetSession = async (request: IRequest, env: Env) => {
     const sessionId = request.ctx.sessionId;
     if (!request.ctx.hasSession) {
-        await request.ctx.setCurrentUserId(sessionId, request.ctx.userId);
+        await request.ctx.setCurrentUserId(
+            sessionId,
+            request.ctx?.body?.userId
+        );
         request.ctx.headers = {
             'Set-Cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=None; Secure;`,
         };

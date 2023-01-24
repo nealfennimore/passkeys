@@ -22,8 +22,10 @@ export class Context {
     private request: Request;
     private env: Env;
     private _sessionId: string | null;
+    // Headers that should be outgoing with the response
     private _headers: Record<string, string> | undefined;
-    private _userId: string | undefined;
+    // Body from the request
+    private _body: Record<string, any> | undefined;
 
     constructor(request: Request, env: Env) {
         this.request = request;
@@ -60,12 +62,12 @@ export class Context {
         this._headers = headers;
     }
 
-    get userId() {
-        return this._userId;
+    get body() {
+        return this._body;
     }
 
-    set userId(userId: string | undefined) {
-        this._userId = userId;
+    set body(data: Record<string, any> | undefined) {
+        this._body = data;
     }
 
     async getUserId(sessionId: string) {

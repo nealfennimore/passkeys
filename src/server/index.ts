@@ -10,7 +10,8 @@ const router = Router();
 router.post(
     '/attestation/generate',
     m.withContext,
-    m.setUserId,
+    m.setRequestBody,
+    m.hasUserId,
     m.maybeSetSession,
     async (request) => {
         try {
@@ -47,7 +48,8 @@ router.post(
 router.post(
     '/assertion/generate',
     m.withContext,
-    m.setUserId,
+    m.setRequestBody,
+    m.hasUserId,
     m.maybeSetSession,
     async (request) => {
         try {
