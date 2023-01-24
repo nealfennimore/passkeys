@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Passkeys</title>
 
-    <script defer type="module" src="/d4f44c83e2184b47057aa12cf1cd05fd2823aa8e3c11718e0cc81f673821607d.bundle.js"></script>
+    <script defer type="module" src="/7872eb5a7c8efd6eea285dae1d958a2b488120894d27917246530f595316eed5.bundle.js"></script>
 
 </head>
 
@@ -16,18 +16,24 @@
     <form id="attestation">
         <fieldset>
             <label for="username">Username</label>
-            <input type="text" name="username" placeholder="Username" autocomplete="username webauthn">
+            <input type="text" name="username" placeholder="Username">
         </fieldset>
-
+    
         <button type="submit">
             <span>Signup</span>
         </button>
     </form>
     <form id="assertion">
+        <fieldset>
+            <label for="username">Username</label>
+            <input type="text" name="username" placeholder="Username" autocomplete="username webauthn">
+        </fieldset>
+    
         <button type="submit">
             <span>Login</span>
         </button>
     </form>
+
 
 </body>
 
