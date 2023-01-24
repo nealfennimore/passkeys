@@ -17,7 +17,7 @@ export class Attestation {
         const challenge = ctx.generateChallenge();
         await ctx.setChallenge(WebAuthnType.Create, challenge);
 
-        return response.json({ challenge }, headers);
+        return response.json({ challenge }, ctx.headers);
     }
 
     static async storeCredential(

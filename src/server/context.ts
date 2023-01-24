@@ -22,6 +22,8 @@ export class Context {
     private request: Request;
     private env: Env;
     private _sessionId: string | null;
+    private _headers: Record<string, string> | undefined;
+    private _userId: string | undefined;
 
     constructor(request: Request, env: Env) {
         this.request = request;
@@ -48,6 +50,22 @@ export class Context {
             return false;
         }
         return !!this.getUserId(sessionId);
+    }
+
+    get headers() {
+        return this._headers;
+    }
+
+    set headers(headers: Record<string, string> | undefined) {
+        this._headers = headers;
+    }
+
+    get userId() {
+        return this._userId;
+    }
+
+    set userId(userId: string | undefined) {
+        this._userId = userId;
     }
 
     async getUserId(sessionId: string) {

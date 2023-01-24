@@ -43,20 +43,11 @@ export class Assertion {
         );
     }
 
-    static async generateChallenge(ctx: Context, userId: string) {
-        const sessionId = ctx.sessionId;
-        let headers;
-        if (!ctx.hasSession) {
-            await ctx.setCurrentUserId(sessionId, userId);
-            headers = {
-                'Set-Cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=None; Secure;`,
-            };
-        }
-
+    static async generate(ctx: Context, userId: string) {
         const challenge = await ctx.generateChallenge();
         await ctx.setChallenge(WebAuthnType.Get, challenge);
 
-        return response.json({ challenge }, headers);
+        return response.json({ challenge }, ctx.headers);
     }
 
     static async verifyCredential(

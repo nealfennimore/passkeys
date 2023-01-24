@@ -1,24 +1,85 @@
-import { Request } from '@cloudflare/workers-types';
-import { IRequest, Router } from 'itty-router';
+import { Router } from 'itty-router';
 import { Assertion } from './assertion';
 import { Attestation } from './attestation';
-import { Context } from './context';
-import { Env } from './env';
+import * as m from './middleware';
 import * as response from './response';
 import * as schema from './schema';
 
 const router = Router();
 
-const withContext = (request: IRequest, env: Env) => {
-    const ctx = new Context(request as unknown as Request, env);
-    request.ctx = ctx;
-};
-
-const requiresSession = (request: IRequest, env: Env) => {
-    if (!request.ctx.hasSession) {
-        return response.json({ error: 'Unauthorized' }, undefined, 401);
+router.post(
+    '/attestation/generate',
+    m.withContext,
+    m.setUserId,
+    m.maybeSetSession,
+    async (request) => {
+        try {
+            return await Attestation.generate(request.ctx, request.ctx.userId);
+        } catch (err: any) {
+            return response.json(
+                { error: err?.message },
+                undefined,
+                err.statusCode
+            );
+        }
     }
-};
+);
+
+router.post(
+    '/attestation/store',
+    m.withContext,
+    m.requiresSession,
+    async (request) => {
+        try {
+            const data =
+                (await request.json()) as schema.Attestation.StoreCredentialPayload;
+            return await Attestation.storeCredential(request.ctx, data);
+        } catch (err: any) {
+            return response.json(
+                { error: err?.message },
+                undefined,
+                err.statusCode
+            );
+        }
+    }
+);
+
+router.post(
+    '/assertion/generate',
+    m.withContext,
+    m.setUserId,
+    m.maybeSetSession,
+    async (request) => {
+        try {
+            return await Assertion.generate(request.ctx, request.ctx.userId);
+        } catch (err: any) {
+            return response.json(
+                { error: err?.message },
+                undefined,
+                err.statusCode
+            );
+        }
+    }
+);
+
+router.post(
+    '/assertion/verify',
+    m.withContext,
+    m.requiresSession,
+    async (request) => {
+        try {
+            const data =
+                (await request.json()) as schema.Assertion.VerifyPayload;
+            return await Assertion.verifyCredential(request.ctx, data);
+        } catch (err: any) {
+            return response.json(
+                { error: err?.message },
+                undefined,
+                err.statusCode
+            );
+        }
+    }
+);
 
 router.options('*', function handleOptions(request) {
     // Make sure the necessary headers are present
@@ -54,72 +115,6 @@ router.options('*', function handleOptions(request) {
         });
     }
 });
-
-router.post('/attestation/generate', withContext, async (request) => {
-    try {
-        const data =
-            (await request.json()) as schema.Attestation.ChallengePayload;
-        return await Attestation.generate(request.ctx, data.userId);
-    } catch (err: any) {
-        return response.json(
-            { error: err?.message },
-            undefined,
-            err.statusCode
-        );
-    }
-});
-
-router.post(
-    '/attestation/store',
-    withContext,
-    requiresSession,
-    async (request) => {
-        try {
-            const data =
-                (await request.json()) as schema.Attestation.StoreCredentialPayload;
-            return await Attestation.storeCredential(request.ctx, data);
-        } catch (err: any) {
-            return response.json(
-                { error: err?.message },
-                undefined,
-                err.statusCode
-            );
-        }
-    }
-);
-
-router.post('/assertion/generate', withContext, async (request) => {
-    try {
-        const data =
-            (await request.json()) as schema.Assertion.ChallengePayload;
-        return await Assertion.generateChallenge(request.ctx, data.userId);
-    } catch (err: any) {
-        return response.json(
-            { error: err?.message },
-            undefined,
-            err.statusCode
-        );
-    }
-});
-
-router.post(
-    '/assertion/verify',
-    withContext,
-    requiresSession,
-    async (request) => {
-        try {
-            const data =
-                (await request.json()) as schema.Assertion.VerifyPayload;
-            return await Assertion.verifyCredential(request.ctx, data);
-        } catch (err: any) {
-            return response.json(
-                { error: err?.message },
-                undefined,
-                err.statusCode
-            );
-        }
-    }
-);
 
 export default {
     fetch: router.handle,
