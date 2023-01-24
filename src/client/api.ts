@@ -1,6 +1,6 @@
-import { Crypto } from '../crypto';
-import * as schema from '../server/schema';
-import { decode, safeDecode, unmarshal } from '../utils';
+import { Crypto } from '../crypto.js';
+import * as schema from '../server/schema.js';
+import { decode, safeDecode, unmarshal } from '../utils.js';
 
 const makeRequest = (endpoint: string, data: object = {}) =>
     fetch(

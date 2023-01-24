@@ -1,5 +1,5 @@
 import { encode } from '../utils.js';
-import * as api from './api';
+import * as api from './api.js';
 export enum COSEAlgorithm {
     ES256 = -7,
     ES384 = -35,
