@@ -43,7 +43,7 @@ export class Assertion {
         );
     }
 
-    static async generate(ctx: Context, userId: string) {
+    static async generate(ctx: Context) {
         const challenge = await ctx.generateChallenge();
         await ctx.setChallenge(WebAuthnType.Get, challenge);
 

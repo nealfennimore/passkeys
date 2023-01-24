@@ -15,6 +15,10 @@ export const setUserId = async (request: IRequest, env: Env) => {
         | schema.Attestation.ChallengePayload
         | schema.Assertion.ChallengePayload;
 
+    if (!data.userId) {
+        return response.json({ error: 'No user ID' }, undefined, 400);
+    }
+
     request.ctx.userId = data.userId;
 };
 

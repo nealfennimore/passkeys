@@ -14,7 +14,7 @@ router.post(
     m.maybeSetSession,
     async (request) => {
         try {
-            return await Attestation.generate(request.ctx, request.ctx.userId);
+            return await Attestation.generate(request.ctx);
         } catch (err: any) {
             return response.json(
                 { error: err?.message },
@@ -51,7 +51,7 @@ router.post(
     m.maybeSetSession,
     async (request) => {
         try {
-            return await Assertion.generate(request.ctx, request.ctx.userId);
+            return await Assertion.generate(request.ctx);
         } catch (err: any) {
             return response.json(
                 { error: err?.message },
