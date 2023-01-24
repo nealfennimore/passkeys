@@ -6,19 +6,18 @@ import * as schema from './schema';
 export class Attestation {
     static async generate(ctx: Context, userId: string) {
         const sessionId = ctx.sessionId;
+        let headers;
         if (!ctx.hasSession) {
             await ctx.setCurrentUserId(sessionId, userId);
+            headers = {
+                'Set-Cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=None; Secure;`,
+            };
         }
 
         const challenge = ctx.generateChallenge();
         await ctx.setChallenge(WebAuthnType.Create, challenge);
 
-        return response.json(
-            { challenge },
-            {
-                'Set-Cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=None; Secure;`,
-            }
-        );
+        return response.json({ challenge }, headers);
     }
 
     static async storeCredential(

@@ -58,8 +58,9 @@ router.options('*', function handleOptions(request) {
 router.post('*', withContext);
 router.post('/attestation/generate', async (request) => {
     try {
-        const data = await request.json();
-        return await Attestation.generate(request.ctx, data.userId as string);
+        const data =
+            (await request.json()) as schema.Attestation.ChallengePayload;
+        return await Attestation.generate(request.ctx, data.userId);
     } catch (err: any) {
         return response.json(
             { error: err?.message },
@@ -85,7 +86,9 @@ router.post('/attestation/store', requiresSession, async (request) => {
 
 router.post('/assertion/generate', requiresSession, async (request) => {
     try {
-        return await Assertion.generateChallengeForCurrentUser(request.ctx);
+        const data =
+            (await request.json()) as schema.Assertion.ChallengePayload;
+        return await Assertion.generateChallenge(request.ctx, data.userId);
     } catch (err: any) {
         return response.json(
             { error: err?.message },

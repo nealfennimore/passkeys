@@ -29,6 +29,9 @@ export namespace Attestation {
 }
 
 export namespace Assertion {
+    export type ChallengePayload = {
+        userId: string;
+    };
     export type ChallengeResponse = ChallengeResponseShared;
 
     export type VerifyPayload = {
