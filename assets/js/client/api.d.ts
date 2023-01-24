@@ -1,4 +1,4 @@
-import * as schema from '../server/schema';
+import * as schema from '../server/schema.js';
 export declare namespace Attestation {
     function generate(userId: string): Promise<{
         challenge: string;

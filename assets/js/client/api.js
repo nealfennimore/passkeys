@@ -1,5 +1,5 @@
-import { Crypto } from '../crypto';
-import { decode, safeDecode, unmarshal } from '../utils';
+import { Crypto } from '../crypto.js';
+import { decode, safeDecode, unmarshal } from '../utils.js';
 const makeRequest = (endpoint, data = {}) => fetch(new Request(`https://api.passkeys.workers.dev/${endpoint}`, {
     method: 'POST',
     headers: {

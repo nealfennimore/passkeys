@@ -1,5 +1,5 @@
 import { encode } from '../utils.js';
-import * as api from './api';
+import * as api from './api.js';
 export var COSEAlgorithm;
 (function (COSEAlgorithm) {
     COSEAlgorithm[COSEAlgorithm["ES256"] = -7] = "ES256";
