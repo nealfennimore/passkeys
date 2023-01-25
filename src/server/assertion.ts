@@ -21,7 +21,8 @@ export class Assertion {
         payload: schema.Assertion.VerifyPayload
     ) {
         const { coseAlg, pubkey } = stored;
-        console.log(stored);
+        console.log(stored.pubkey);
+        console.log(stored.pubkey.byteLength);
         const signingAlg = COSEAlgToSigningAlg[coseAlg];
         const key = await Crypto.toCryptoKey(
             pubkey,
