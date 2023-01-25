@@ -75,19 +75,15 @@ export class Assertion {
                 throw new Error('Incorrect challenge');
             }
 
-            const credentials = await ctx.getCredentialsByKid(kid);
-            if (!credentials?.length) {
-                throw new Error('No credentials found');
+            const { jwk, userId: storedUserId } = await ctx.getCredentialByKid(
+                kid
+            );
+            const userId = await ctx.getCurrentUserId();
+            if (userId !== storedUserId) {
+                throw new Error('User does not own key');
             }
 
-            const isVerified = credentials.some(
-                async ({ kid: storedKid, jwk }) => {
-                    if (kid !== storedKid) {
-                        return false;
-                    }
-                    return await Assertion.verify(jwk, payload);
-                }
-            );
+            const isVerified = await Assertion.verify(jwk, payload);
             return response.json({ isVerified });
         } finally {
             await ctx.deleteChallengeForSession(WebAuthnType.Get);

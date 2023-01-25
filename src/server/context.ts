@@ -1,17 +1,13 @@
 import { Request } from '@cloudflare/workers-types';
 import { parse } from 'cookie';
-import {
-    fromBase64Url,
-    marshal,
-    safeDecode,
-    toBase64Url,
-    unmarshal,
-} from '../utils.js';
+import { safeDecode } from '../utils.js';
 import { Env } from './env';
+import * as schema from './schema';
 
 export interface StoredCredential {
     kid: string;
     jwk: JsonWebKey;
+    userId: string;
 }
 
 type Cookie = {
@@ -65,18 +61,24 @@ export class Context {
         return cookie.session_id || null;
     }
 
-    async getUserId(sessionId: string) {
+    async getSessionUserId(sessionId: string) {
         return await this.env.sessions.get(sessionId);
     }
 
     async getCurrentUserId() {
-        return await this.getUserId(this.sessionId);
+        return await this.getSessionUserId(this.sessionId);
     }
 
-    async setCurrentUserIdForSession(sessionId: string, userId: string) {
-        return await this.env.sessions.put(sessionId, userId, {
-            expirationTtl: 60 * 60 * 24,
-        });
+    async createUser(userId: string) {
+        const { success } = await this.env.DB.prepare(
+            'INSERT INTO users(id) VALUES(?)'
+        )
+            .bind(userId)
+            .run();
+
+        if (!success) {
+            throw new Error('Failed to create user');
+        }
     }
 
     async getChallengeForSession(type: string) {
@@ -109,75 +111,34 @@ export class Context {
         return await this.env.challenges.delete(`${sessionId}:${type}`);
     }
 
-    async getUserIdByKid(kid: string) {
-        return await this.env.pubkeys.get(`kid:${kid}`);
-    }
-
-    async setUserIdForKid(kid: string, userId: string) {
-        return await this.env.pubkeys.put(`kid:${kid}`, userId, {
+    async setCurrentUserIdForSession(sessionId: string, userId: string) {
+        return await this.env.sessions.put(sessionId, userId, {
             expirationTtl: 60 * 60 * 24,
         });
     }
 
-    async getCredentialsByUserId(userId: string) {
-        return await this.env.pubkeys.get(`user:${userId}`);
-    }
-
-    async setCredentialsForUserId(
-        userId: string,
-        credentials: Array<StoredCredential>
+    async createCredential(
+        payload: schema.Attestation.StoreCredentialPayload,
+        userId: string
     ) {
-        return await this.env.pubkeys.put(
-            `user:${userId}`,
-            toBase64Url(marshal(credentials)),
-            {
-                expirationTtl: 60 * 60 * 24,
-            }
-        );
+        const { kid, jwk, attestationObject } = payload;
+        const { success } = await this.env.DB.prepare(
+            'INSERT INTO public_keys(kid, jwk, attestation_data, user_id) VALUES(?1, ?2, ?3, ?4)'
+        )
+            .bind(kid, jwk, attestationObject, userId)
+            .run();
+
+        if (!success) {
+            throw new Error('Failed to create credential');
+        }
     }
 
-    async getCredentialsByKid(kid: string) {
-        const userId = await this.getUserIdByKid(kid);
-        if (!userId) {
-            return null;
-        }
-        const credentials = await this.getCredentialsByUserId(userId);
-        if (!credentials) {
-            return null;
-        }
-        return unmarshal(fromBase64Url(credentials)) as Array<StoredCredential>;
-    }
-
-    async getCurrentCredentials() {
-        const userId = await this.getCurrentUserId();
-        if (!userId) {
-            return null;
-        }
-        const credentials = await this.env.pubkeys.get(userId);
-        if (!credentials) {
-            return null;
-        }
-        return unmarshal(fromBase64Url(credentials)) as Array<StoredCredential>;
-    }
-
-    async setCredentials(credentials: Array<StoredCredential>) {
-        const userId = await this.getCurrentUserId();
-        if (!userId) {
-            return;
-        }
-        const storedCredentials = (await this.getCurrentCredentials()) ?? [];
-        const combinedCredentials = [...storedCredentials, ...credentials];
-        return await this.setCredentialsForUserId(userId, combinedCredentials);
-    }
-
-    async setKidForCurrentUser(credentials: Array<StoredCredential>) {
-        const userId = await this.getCurrentUserId();
-        if (!userId) {
-            return;
-        }
-        return await Promise.all(
-            credentials.map(({ kid }) => this.setUserIdForKid(kid, userId))
-        );
+    async getCredentialByKid(kid: string) {
+        return (await this.env.DB.prepare(
+            'SELECT kid, jwk, user_id FROM public_keys WHERE kid = ?'
+        )
+            .bind(kid)
+            .first()) as StoredCredential;
     }
 
     generateChallenge() {

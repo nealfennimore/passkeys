@@ -17,7 +17,7 @@ export class Attestation {
         payload: schema.Attestation.StoreCredentialPayload
     ) {
         try {
-            const { clientDataJSON, kid, jwk } = payload;
+            const { clientDataJSON, kid, jwk, attestationObject } = payload;
             const { challenge, type } = unmarshal(
                 fromBase64Url(clientDataJSON)
             ) as schema.ClientDataJSON;
@@ -37,17 +37,12 @@ export class Attestation {
                 throw new Error('Incorrect challenge');
             }
 
-            const credentials = [
-                {
-                    kid,
-                    jwk,
-                },
-            ];
-
-            await Promise.all([
-                ctx.setCredentials(credentials),
-                ctx.setKidForCurrentUser(credentials),
-            ]);
+            const userId = await ctx.getCurrentUserId();
+            if (!userId) {
+                throw new Error('No user');
+            }
+            await ctx.createUser(userId);
+            await ctx.createCredential(payload, userId);
 
             return response.json({
                 kid,

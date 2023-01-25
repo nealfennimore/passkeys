@@ -10,3 +10,9 @@ kv_namespaces = [
 ]
 
 routes = []
+
+[[ d1_databases ]]
+binding = "DB"
+database_name = "passkeys"
+database_id = "e9bebaa7-8e76-4710-b767-b92411d87a69"
+
