@@ -6,8 +6,9 @@ import * as schema from './schema';
 
 export interface StoredCredential {
     kid: string;
-    jwk: JsonWebKey;
+    pubkey: ArrayBuffer;
     userId: string;
+    coseAlg: number;
 }
 
 type Cookie = {
@@ -127,7 +128,7 @@ export class Context {
 
     async getCredentialByKid(kid: string) {
         return (await this.env.DB.prepare(
-            'SELECT kid, jwk, user_id FROM public_keys WHERE kid = ?'
+            'SELECT kid, pubkey, cose_alg as coseAlg, user_id as userId FROM public_keys WHERE kid = ?'
         )
             .bind(kid)
             .first()) as StoredCredential;

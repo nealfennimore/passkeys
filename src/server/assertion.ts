@@ -1,4 +1,9 @@
-import { Crypto, JwkAlg, JwkAlgToDigest, JwkAlgToSigningAlg } from '../crypto';
+import {
+    COSEAlgToDigest,
+    COSEAlgToSigningAlg,
+    COSEAlgToSigningCurve,
+    Crypto,
+} from '../crypto';
 import {
     concatBuffer,
     fromBase64Url,
@@ -12,12 +17,17 @@ import * as schema from './schema';
 
 export class Assertion {
     private static async verify(
-        jwk: JsonWebKey,
+        pubkey: ArrayBuffer,
+        coseAlg: number,
         payload: schema.Assertion.VerifyPayload
     ) {
-        const pubKey = await Crypto.fromJWK(jwk);
-        const signingAlg = JwkAlgToSigningAlg[jwk.alg as JwkAlg];
-        const hashAlg = JwkAlgToDigest[jwk.alg as JwkAlg];
+        const signingAlg = COSEAlgToSigningAlg[coseAlg];
+        const key = await Crypto.toCryptoKey(
+            pubkey,
+            signingAlg,
+            COSEAlgToSigningCurve[coseAlg]
+        );
+        const digestAlg = COSEAlgToDigest[coseAlg];
 
         const signature = safeEncode(payload.signature);
         const authenticatorData = safeEncode(payload.authenticatorData);
@@ -32,12 +42,12 @@ export class Assertion {
 
         const digest = concatBuffer(
             authenticatorData,
-            await crypto.subtle.digest(hashAlg, clientDataJSON)
+            await crypto.subtle.digest(digestAlg, clientDataJSON)
         );
 
         return await crypto.subtle.verify(
-            { name: signingAlg, hash: { name: hashAlg } },
-            pubKey,
+            { name: signingAlg, hash: { name: digestAlg } },
+            key,
             rawSig,
             digest
         );
@@ -75,15 +85,17 @@ export class Assertion {
                 throw new Error('Incorrect challenge');
             }
 
-            const { jwk, userId: storedUserId } = await ctx.getCredentialByKid(
-                kid
-            );
+            const {
+                pubkey,
+                userId: storedUserId,
+                coseAlg,
+            } = await ctx.getCredentialByKid(kid);
             const userId = await ctx.getCurrentUserId();
             if (userId !== storedUserId) {
                 throw new Error('User does not own key');
             }
 
-            const isVerified = await Assertion.verify(jwk, payload);
+            const isVerified = await Assertion.verify(pubkey, coseAlg, payload);
             return response.json({ isVerified });
         } finally {
             await ctx.deleteChallengeForSession(WebAuthnType.Get);
