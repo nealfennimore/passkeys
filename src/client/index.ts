@@ -56,7 +56,7 @@ if (
     async function assertion(abortController: AbortController) {
         const { challenge } = await api.Assertion.generate();
         const publicKey: PublicKeyCredentialRequestOptions = {
-            challenge: encode(challenge),
+            challenge: safeEncode(challenge),
             rpId: window.location.host,
             timeout: 60_000,
         };
