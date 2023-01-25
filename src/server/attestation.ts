@@ -41,8 +41,11 @@ export class Attestation {
             if (!userId) {
                 throw new Error('No user');
             }
-            await ctx.createUser(userId);
-            await ctx.createCredential(payload, userId);
+
+            await ctx.DB.batch([
+                ctx.createUser(userId),
+                ctx.createCredential(payload, userId),
+            ]);
 
             return response.json({
                 kid,

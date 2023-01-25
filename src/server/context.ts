@@ -45,6 +45,10 @@ export class Context {
         this._body = data;
     }
 
+    get DB() {
+        return this.env.DB;
+    }
+
     get sessionId() {
         if (this._sessionId) {
             return this._sessionId;
@@ -69,16 +73,10 @@ export class Context {
         return await this.getSessionUserId(this.sessionId);
     }
 
-    async createUser(userId: string) {
-        const { success } = await this.env.DB.prepare(
-            'INSERT INTO users(id) VALUES(?)'
-        )
-            .bind(userId)
-            .run();
-
-        if (!success) {
-            throw new Error('Failed to create user');
-        }
+    createUser(userId: string) {
+        return this.env.DB.prepare('INSERT INTO users(id) VALUES(?)').bind(
+            userId
+        );
     }
 
     async getChallengeForSession(type: string) {
@@ -117,20 +115,14 @@ export class Context {
         });
     }
 
-    async createCredential(
+    createCredential(
         payload: schema.Attestation.StoreCredentialPayload,
         userId: string
     ) {
         const { kid, jwk, attestationObject } = payload;
-        const { success } = await this.env.DB.prepare(
+        return this.env.DB.prepare(
             'INSERT INTO public_keys(kid, jwk, attestation_data, user_id) VALUES(?1, ?2, ?3, ?4)'
-        )
-            .bind(kid, jwk, attestationObject, userId)
-            .run();
-
-        if (!success) {
-            throw new Error('Failed to create credential');
-        }
+        ).bind(kid, jwk, attestationObject, userId);
     }
 
     async getCredentialByKid(kid: string) {
