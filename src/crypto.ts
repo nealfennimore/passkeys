@@ -48,7 +48,7 @@ export class Crypto {
         namedCurve: SigningCurve
     ) {
         return await crypto.subtle.importKey(
-            'spki',
+            'raw',
             pubKey,
             { name, namedCurve },
             true,
