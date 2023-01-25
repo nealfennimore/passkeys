@@ -148,7 +148,7 @@ export class Context {
 
         return {
             kid,
-            pubkey: new Uint8Array(pubkey).buffer,
+            pubkey: Uint8Array.from(pubkey).buffer,
             coseAlg,
             userId,
         } as StoredCredential;
