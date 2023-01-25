@@ -1,5 +1,5 @@
 import * as schema from '../server/schema.js';
-import { safeDecode } from '../utils.js';
+import { safeByteDecode, safeDecode } from '../utils.js';
 
 const makeRequest = (endpoint: string, data: object = {}) =>
     fetch(
@@ -28,8 +28,8 @@ export namespace Attestation {
         const payload: schema.Attestation.StoreCredentialPayload = {
             kid: credential.id,
             clientDataJSON: safeDecode(attestation.clientDataJSON),
-            attestationObject: safeDecode(attestation.attestationObject),
-            pubkey: safeDecode(attestation.getPublicKey() as ArrayBuffer),
+            attestationObject: safeByteDecode(attestation.attestationObject),
+            pubkey: safeByteDecode(attestation.getPublicKey() as ArrayBuffer),
             coseAlg: attestation.getPublicKeyAlgorithm(),
         };
 

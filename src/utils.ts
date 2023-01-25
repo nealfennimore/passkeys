@@ -8,6 +8,23 @@ const decoder = new TextDecoder();
 export const encode = encoder.encode.bind(encoder);
 export const decode = decoder.decode.bind(decoder);
 
+function byteStringToArrayBuffer(byteString: string) {
+    let bytes = new Uint8Array(byteString.length);
+    for (var i = 0; i < byteString.length; i++) {
+        bytes[i] = byteString.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
+function arrayBufferToByteString(buffer: ArrayBuffer) {
+    const arr = new Uint8Array(buffer);
+    let byteString = '';
+    for (var i = 0; i < arr.byteLength; i++) {
+        byteString += String.fromCharCode(arr[i]);
+    }
+    return byteString;
+}
+
 // From: https://github.com/joaquimserafim/base64-url/blob/master/index.js
 export function unescape(str: string) {
     return (str + '==='.slice((str.length + 3) % 4))
@@ -28,6 +45,10 @@ export const fromBase64Url = _fromBase64Url;
 
 export const safeEncode = (data: string) => encode(fromBase64Url(data));
 export const safeDecode = (data: ArrayBuffer) => toBase64Url(decode(data));
+export const safeByteEncode = (data: string) =>
+    byteStringToArrayBuffer(fromBase64Url(data));
+export const safeByteDecode = (data: ArrayBuffer) =>
+    toBase64Url(arrayBufferToByteString(data));
 
 export function concatBuffer(buffer1: ArrayBuffer, buffer2: ArrayBuffer) {
     let tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);

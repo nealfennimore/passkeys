@@ -1,6 +1,6 @@
 import { Request } from '@cloudflare/workers-types';
 import { parse } from 'cookie';
-import { safeDecode, safeEncode } from '../utils.js';
+import { safeByteDecode, safeByteEncode, safeDecode } from '../utils.js';
 import { Env } from './env';
 import * as schema from './schema';
 
@@ -129,14 +129,14 @@ export class Context {
     ) {
         const { kid, pubkey, attestationObject, coseAlg } = payload;
         console.log(`BASE64 ${pubkey}`);
-        console.log(`ENCODED ${safeEncode(pubkey)}`);
+        console.log(`ENCODED ${safeByteEncode(pubkey)}`);
 
         return this.env.DB.prepare(
             'INSERT INTO public_keys(kid, pubkey, attestation_data, cose_alg, user_id) VALUES(?1, ?2, ?3, ?4, ?5)'
         ).bind(
             kid,
-            safeEncode(pubkey).buffer,
-            safeEncode(attestationObject).buffer,
+            safeByteEncode(pubkey),
+            safeByteEncode(attestationObject),
             coseAlg,
             userId
         );
@@ -149,7 +149,7 @@ export class Context {
             .bind(kid)
             .first()) as DBCredential;
 
-        console.log(`BASE64 ${safeDecode(Uint8Array.from(pubkey))}`);
+        console.log(`BASE64 ${safeByteDecode(Uint8Array.from(pubkey))}`);
         console.log(`ENCODED ${pubkey}`);
 
         return {
