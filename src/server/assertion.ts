@@ -11,16 +11,18 @@ import {
     unmarshal,
     WebAuthnType,
 } from '../utils';
-import { Context } from './context';
+import { Context, StoredCredential } from './context';
 import * as response from './response';
 import * as schema from './schema';
 
 export class Assertion {
     private static async verify(
-        pubkey: ArrayBuffer,
-        coseAlg: number,
+        stored: StoredCredential,
         payload: schema.Assertion.VerifyPayload
     ) {
+        const { coseAlg, pubkey } = stored;
+        console.log(typeof pubkey);
+        console.log(pubkey);
         const signingAlg = COSEAlgToSigningAlg[coseAlg];
         const key = await Crypto.toCryptoKey(
             pubkey,
@@ -85,17 +87,13 @@ export class Assertion {
                 throw new Error('Incorrect challenge');
             }
 
-            const {
-                pubkey,
-                userId: storedUserId,
-                coseAlg,
-            } = await ctx.getCredentialByKid(kid);
+            const stored = await ctx.getCredentialByKid(kid);
             const userId = await ctx.getCurrentUserId();
-            if (userId !== storedUserId) {
+            if (userId !== stored.userId) {
                 throw new Error('User does not own key');
             }
 
-            const isVerified = await Assertion.verify(pubkey, coseAlg, payload);
+            const isVerified = await Assertion.verify(stored, payload);
             return response.json({ isVerified });
         } finally {
             await ctx.deleteChallengeForSession(WebAuthnType.Get);
