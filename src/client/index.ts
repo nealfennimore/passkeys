@@ -68,10 +68,18 @@ if (
         return await api.Assertion.verify(credential);
     }
 
-    const cancelButton = document.querySelector('button#cancel');
+    const form = document.querySelector('form#passkeys') as HTMLFormElement;
+    const signupButton = form.querySelector('button#signup');
+    const loginButton = form.querySelector('button#login');
+
     const output = document.querySelector(
         'textarea#output'
     ) as HTMLTextAreaElement;
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        return false;
+    });
 
     const submit = (fn: CallableFunction) => async (e: Event) => {
         e.preventDefault();
@@ -79,25 +87,17 @@ if (
             document.querySelector('form#passkeys') as HTMLFormElement
         );
         const abortController = new AbortController();
-        cancelButton?.addEventListener('click', abortController.abort, {
-            once: true,
-            signal: abortController.signal,
-        });
-        const response = await fn(
-            abortController,
-            data.get('username') as string
-        );
+        const username = data.get('username');
+        if (e.target === signupButton && !username) {
+            return form.reportValidity();
+        }
+
+        const response = await fn(abortController, username);
         if (output) {
             output.value = JSON.stringify(response, undefined, 4);
         }
-        abortController.abort();
     };
 
-    document
-        .querySelector('form#passkeys button#signup')
-        ?.addEventListener('click', submit(attestation));
-
-    document
-        .querySelector('form#passkeys button#login')
-        ?.addEventListener('click', submit(assertion));
+    signupButton?.addEventListener('click', submit(attestation));
+    loginButton?.addEventListener('click', submit(assertion));
 }

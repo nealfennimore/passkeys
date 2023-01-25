@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passkeys</title>
+    <link rel="stylesheet" href="app.css">
+
+    <script defer type="module" src="{{bundle.js}}"></script>
+</head>
+
+<body>
+    <main class="grid h-screen place-items-center">
+        <section class="flex flex-col space-y-4">
+            <form id="passkeys" class="flex flex-col space-y-4">
+                <fieldset>
+                    <label class="block">
+                        <span class="block text-sm font-medium text-slate-700">Username</span>
+                        <input class="block rounded w-full" type="text" name="username" autocomplete="username webauthn"
+                            required>
+                    </label>
+                </fieldset>
+
+                <div class="inline-flex rounded-md" role="group">
+                    <button type="button" id="signup"
+                        class="bg-slate-700 px-4 py-2 text-sm font-medium text-white bg-white border border-slate-500 rounded-l-lg">
+                        <span>Signup</span>
+                    </button>
+                    <button type="button" id="login"
+                        class="bg-slate-700 px-4 py-2 text-sm font-medium text-white bg-white border border-slate-500 rounded-r-md">
+                        <span>Login</span>
+                    </button>
+                </div>
+            </form>
+
+            <label class="block">
+                <span class="block text-sm font-medium text-slate-700">Output</span>
+                <textarea class="block rounded w-full" id="output" readonly></textarea>
+            </label>
+        </section>
+    </main>
+</body>
+
+</html>

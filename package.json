@@ -6,7 +6,7 @@
   "scripts": {
     "prepare": "npm run build",
     "prebuild": "rm -rf build",
-    "build:client": "tsc -noEmit && esbuild ./src/client/index.ts --bundle --minify --sourcemap --format=esm --outdir=build",
+    "build:client": "tsc -noEmit && esbuild ./src/client/index.ts --bundle --minify --sourcemap --format=esm --outdir=build && npx tailwindcss -i ./src/client/assets/tailwind.css -o ./src/client/assets/app.css --minify",
     "build": "npm run build:client",
     "postbuild": "./scripts/make-assets.sh",
     "watch": "tsc --watch",
@@ -19,10 +19,12 @@
   "license": "MIT",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20221111.1",
+    "@tailwindcss/forms": "^0.5.3",
     "@types/cookie": "^0.5.1",
     "esbuild": "^0.17.4",
     "gh-pages": "^4.0.0",
     "prettier": "^2.8.3",
+    "tailwindcss": "^3.2.4",
     "wrangler": "^2.7.1"
   },
   "dependencies": {
