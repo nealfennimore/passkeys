@@ -31,7 +31,7 @@ export namespace Attestation {
             credential.response as AuthenticatorAttestationResponse;
 
         const payload: schema.Attestation.StoreCredentialPayload = {
-            kid: safeDecode(credential.rawId),
+            kid: credential.id,
             clientDataJSON: safeDecode(attestation.clientDataJSON),
             attestationObject: safeDecode(attestation.attestationObject),
             jwk: await Crypto.toJWK(
@@ -64,7 +64,7 @@ export namespace Assertion {
     export async function verify(credential: PublicKeyCredential) {
         const assertion = credential.response as AuthenticatorAssertionResponse;
         const payload: schema.Assertion.VerifyPayload = {
-            kid: safeDecode(credential.rawId),
+            kid: credential.id,
             clientDataJSON: safeDecode(assertion.clientDataJSON),
             authenticatorData: safeDecode(assertion.authenticatorData),
             signature: safeDecode(assertion.signature),
