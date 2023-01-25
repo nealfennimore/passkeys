@@ -29,6 +29,9 @@ export namespace Attestation {
         console.log(JSON.parse(decode(attestation.clientDataJSON)));
         // DEBUG:
         console.log(cborDecode(new Uint8Array(attestation.attestationObject)));
+        // DEBUG:
+        // @ts-ignore
+        window.attestation = credential;
 
         const payload: schema.Attestation.StoreCredentialPayload = {
             kid: credential.id,
@@ -57,7 +60,10 @@ export namespace Assertion {
         // DEBUG:
         console.log(JSON.parse(decode(assertion.clientDataJSON)));
         // DEBUG:
-        console.log(decode(new Uint8Array(assertion.authenticatorData)));
+        console.log(assertion.authenticatorData);
+        // DEBUG:
+        // @ts-ignore
+        window.assertion = credential;
 
         const payload: schema.Assertion.VerifyPayload = {
             kid: credential.id,
