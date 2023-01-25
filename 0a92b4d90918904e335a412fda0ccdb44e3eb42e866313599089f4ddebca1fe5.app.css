@@ -739,14 +739,14 @@ select {
   border-width: 1px;
 }
 
-.border-slate-500 {
+.border-slate-700 {
   --tw-border-opacity: 1;
-  border-color: rgb(100 116 139 / var(--tw-border-opacity));
+  border-color: rgb(51 65 85 / var(--tw-border-opacity));
 }
 
-.bg-slate-700 {
+.bg-slate-800 {
   --tw-bg-opacity: 1;
-  background-color: rgb(51 65 85 / var(--tw-bg-opacity));
+  background-color: rgb(30 41 59 / var(--tw-bg-opacity));
 }
 
 .bg-white {
