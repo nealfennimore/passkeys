@@ -1,3 +1,4 @@
+import { decode } from 'cbor-x/decode';
 import {
     COSEAlgToDigest,
     COSEAlgToSigningAlg,
@@ -10,7 +11,8 @@ import {
     unmarshal,
     WebAuthnType,
 } from '../utils';
-import { Context, StoredCredential } from './context';
+import { Context } from './context';
+import { CborAttestation, StoredCredential } from './db';
 import * as response from './response';
 import * as schema from './schema';
 
@@ -19,7 +21,12 @@ export class Assertion {
         stored: StoredCredential,
         payload: schema.Assertion.VerifyPayload
     ) {
-        const { coseAlg, pubkey } = stored;
+        const { pubkey, attestationData } = stored;
+        const attestation = decode(
+            new Uint8Array(attestationData)
+        ) as CborAttestation;
+        const coseAlg = attestation.attStmt.alg;
+
         const signingAlg = COSEAlgToSigningAlg[coseAlg];
         const key = await Crypto.toCryptoKey(
             pubkey,
