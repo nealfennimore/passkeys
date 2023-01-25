@@ -5,27 +5,15 @@ import * as schema from '../schema';
 export interface DBCredential {
     kid: string;
     pubkey: Array<number>;
-    attestation_data: Array<number>;
     userId: string;
+    coseAlg: number;
 }
 
 export interface StoredCredential {
     kid: string;
     pubkey: ArrayBuffer;
-    attestationData: ArrayBuffer;
     userId: string;
-}
-
-export interface AttestationStatement {
-    alg: number;
-    sig: ArrayBuffer;
-    x5c: Array<ArrayBuffer>;
-}
-
-export interface CborAttestation {
-    attStmt: AttestationStatement;
-    authData: ArrayBuffer;
-    fmt: string;
+    coseAlg: number;
 }
 
 export class DB {
@@ -47,7 +35,7 @@ export class DB {
         payload: schema.Attestation.StoreCredentialPayload,
         userId: string
     ) {
-        const { kid, pubkey, attestationObject } = payload;
+        const { kid, pubkey, attestationObject, coseAlg } = payload;
 
         return this.D1.prepare(
             'INSERT INTO public_keys(kid, pubkey, attestation_data, user_id) VALUES(?1, ?2, ?3, ?4)'
@@ -55,13 +43,14 @@ export class DB {
             kid,
             safeByteEncode(pubkey),
             safeByteEncode(attestationObject),
+            coseAlg,
             userId
         );
     }
 
     async getCredentialByKid(kid: string) {
-        const { pubkey, userId, attestation_data } = (await this.D1.prepare(
-            'SELECT kid, pubkey, user_id as userId, attestation_data FROM public_keys WHERE kid = ?'
+        const { pubkey, coseAlg, userId } = (await this.D1.prepare(
+            'SELECT kid, pubkey, cose_alg as coseAlg, user_id as userId FROM public_keys WHERE kid = ?'
         )
             .bind(kid)
             .first()) as DBCredential;
@@ -69,7 +58,7 @@ export class DB {
         return {
             kid,
             pubkey: Uint8Array.from(pubkey).buffer,
-            attestationData: Uint8Array.from(attestation_data).buffer,
+            coseAlg,
             userId,
         } as StoredCredential | null;
     }

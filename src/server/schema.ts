@@ -21,6 +21,7 @@ export namespace Attestation {
         clientDataJSON: string;
         attestationObject: string;
         pubkey: string;
+        coseAlg: number;
     };
 
     export type StoreCredentialResponse = {

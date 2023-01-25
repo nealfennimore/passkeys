@@ -4,6 +4,20 @@ import { Cache } from './cache';
 import { DB } from './db';
 import { Env } from './env';
 
+export interface DBCredential {
+    kid: string;
+    pubkey: Array<number>;
+    userId: string;
+    coseAlg: number;
+}
+
+export interface StoredCredential {
+    kid: string;
+    pubkey: ArrayBuffer;
+    userId: string;
+    coseAlg: number;
+}
+
 export class Context {
     private _headers: Record<string, string> | undefined;
     // Body from the request

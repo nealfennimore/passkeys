@@ -38,6 +38,7 @@ export namespace Attestation {
             clientDataJSON: safeByteDecode(attestation.clientDataJSON),
             attestationObject: safeByteDecode(attestation.attestationObject),
             pubkey: safeByteDecode(attestation.getPublicKey() as ArrayBuffer),
+            coseAlg: attestation.getPublicKeyAlgorithm(),
         };
 
         const response = await makeRequest('attestation/store', payload);
