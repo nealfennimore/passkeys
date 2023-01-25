@@ -5,8 +5,9 @@ import * as schema from './schema';
 
 export class Attestation {
     static async generate(ctx: Context) {
+        await ctx.setCurrentUserIdForSession(ctx.sessionId, ctx?.body?.userId);
         const challenge = ctx.generateChallenge();
-        await ctx.setChallenge(WebAuthnType.Create, challenge);
+        await ctx.setChallengeForSession(WebAuthnType.Create, challenge);
 
         return response.json({ challenge }, ctx.headers);
     }
@@ -25,7 +26,9 @@ export class Attestation {
                 throw new Error('Wrong credential type');
             }
 
-            const storedChallenge = await ctx.getChallenge(WebAuthnType.Create);
+            const storedChallenge = await ctx.getChallengeForSession(
+                WebAuthnType.Create
+            );
             if (storedChallenge === null) {
                 throw new Error('Must regenerate challenge');
             }
@@ -34,19 +37,23 @@ export class Attestation {
                 throw new Error('Incorrect challenge');
             }
 
-            await ctx.setCredentials([
+            const credentials = [
                 {
                     kid,
                     jwk,
                 },
+            ];
+
+            await Promise.all([
+                ctx.setCredentials(credentials),
+                ctx.setKidForCurrentUser(credentials),
             ]);
 
-            const data = {
+            return response.json({
                 kid,
-            } as schema.Attestation.StoreCredentialResponse;
-            return response.json(data);
+            } as schema.Attestation.StoreCredentialResponse);
         } finally {
-            await ctx.deleteChallenge(WebAuthnType.Create);
+            await ctx.deleteChallengeForSession(WebAuthnType.Create);
         }
     }
 }

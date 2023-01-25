@@ -9,8 +9,9 @@ if (
 ) {
     async function attestation(
         abortController: AbortController,
-        userId: string
+        username: string
     ) {
+        const userId = crypto.randomUUID();
         const { challenge } = await api.Attestation.generate(userId);
         const publicKey: PublicKeyCredentialCreationOptions = {
             challenge: safeEncode(challenge),
@@ -20,8 +21,8 @@ if (
             },
             user: {
                 id: encode(userId),
-                name: userId,
-                displayName: userId,
+                name: username,
+                displayName: '',
             },
             pubKeyCredParams: [
                 {
@@ -52,8 +53,8 @@ if (
         return await api.Attestation.store(credential);
     }
 
-    async function assertion(abortController: AbortController, userId: string) {
-        const { challenge } = await api.Assertion.generate(userId);
+    async function assertion(abortController: AbortController) {
+        const { challenge } = await api.Assertion.generate();
         const publicKey: PublicKeyCredentialRequestOptions = {
             challenge: encode(challenge),
             rpId: window.location.host,

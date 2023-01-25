@@ -53,7 +53,7 @@ export namespace Attestation {
 }
 
 export namespace Assertion {
-    export async function generate(userId: string) {
+    export async function generate() {
         const response = await makeRequest('assertion/generate', {
             userId,
         } as schema.Assertion.ChallengePayload);

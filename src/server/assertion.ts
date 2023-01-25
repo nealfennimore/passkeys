@@ -45,7 +45,7 @@ export class Assertion {
 
     static async generate(ctx: Context) {
         const challenge = await ctx.generateChallenge();
-        await ctx.setChallenge(WebAuthnType.Get, challenge);
+        await ctx.setChallengeForSession(WebAuthnType.Get, challenge);
 
         return response.json({ challenge }, ctx.headers);
     }
@@ -64,16 +64,18 @@ export class Assertion {
                 throw new Error('Wrong credential type');
             }
 
-            const storedChallenge = await ctx.getChallenge(WebAuthnType.Get);
+            const storedChallenge = await ctx.getChallengeForSession(
+                WebAuthnType.Get
+            );
             if (storedChallenge === null) {
                 throw new Error('Must regenerate challenge');
             }
 
-            if (fromBase64Url(challenge) !== storedChallenge) {
+            if (challenge !== storedChallenge) {
                 throw new Error('Incorrect challenge');
             }
 
-            const credentials = await ctx.getCurrentCredentials();
+            const credentials = await ctx.getCredentialsByKid(kid);
             if (!credentials?.length) {
                 throw new Error('No credentials found');
             }
@@ -88,7 +90,7 @@ export class Assertion {
             );
             return response.json({ isVerified });
         } finally {
-            await ctx.deleteChallenge(WebAuthnType.Get);
+            await ctx.deleteChallengeForSession(WebAuthnType.Get);
         }
     }
 }

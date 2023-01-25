@@ -33,27 +33,6 @@ export class Context {
         this._sessionId = null;
     }
 
-    get sessionId() {
-        if (this._sessionId) {
-            return this._sessionId;
-        }
-        this._sessionId = this.cookieSessionId ?? crypto.randomUUID();
-        return this._sessionId;
-    }
-
-    get cookieSessionId() {
-        const cookie = parse(this.request.headers.get('Cookie') ?? '');
-        return cookie.session_id || null;
-    }
-
-    get hasSession() {
-        const sessionId = this.cookieSessionId;
-        if (!sessionId) {
-            return false;
-        }
-        return !!this.getUserId(sessionId);
-    }
-
     get headers() {
         return this._headers;
     }
@@ -70,6 +49,22 @@ export class Context {
         this._body = data;
     }
 
+    get sessionId() {
+        if (this._sessionId) {
+            return this._sessionId;
+        }
+        this._sessionId = this.cookieSessionId ?? crypto.randomUUID();
+        return this._sessionId;
+    }
+    get hasSession() {
+        return !!this.cookieSessionId;
+    }
+
+    get cookieSessionId() {
+        const cookie = parse(this.request.headers.get('Cookie') ?? '');
+        return cookie.session_id || null;
+    }
+
     async getUserId(sessionId: string) {
         return await this.env.sessions.get(sessionId);
     }
@@ -78,38 +73,77 @@ export class Context {
         return await this.getUserId(this.sessionId);
     }
 
-    async setCurrentUserId(sessionId: string, userId: string) {
+    async setCurrentUserIdForSession(sessionId: string, userId: string) {
         return await this.env.sessions.put(sessionId, userId);
     }
 
-    async getChallenge(type: string) {
-        const userId = await this.getCurrentUserId();
-        if (!userId) {
+    async getChallengeForSession(type: string) {
+        const sessionId = this.sessionId;
+        if (!sessionId) {
             return null;
         }
-        return await this.env.challenges.get(`${userId}:${type}`);
+        return await this.env.challenges.get(`${sessionId}:${type}`);
     }
 
-    async setChallenge(type: string, challenge: string) {
-        const userId = await this.getCurrentUserId();
-        if (!userId) {
+    async setChallengeForSession(type: string, challenge: string) {
+        const sessionId = this.sessionId;
+        if (!sessionId) {
             return null;
         }
-        return await this.env.challenges.put(`${userId}:${type}`, challenge, {
-            expirationTtl: 60 * 5,
+        return await this.env.challenges.put(
+            `${sessionId}:${type}`,
+            challenge,
+            {
+                expirationTtl: 60 * 5,
+            }
+        );
+    }
+
+    async deleteChallengeForSession(type: string) {
+        const sessionId = this.sessionId;
+        if (!sessionId) {
+            return null;
+        }
+        return await this.env.challenges.delete(`${sessionId}:${type}`);
+    }
+
+    async getUserIdByKid(kid: string) {
+        return await this.env.pubkeys.get(`kid:${kid}`);
+    }
+
+    async setUserIdForKid(kid: string, userId: string) {
+        return await this.env.pubkeys.put(`kid:${kid}`, userId, {
+            expirationTtl: 60 * 60 * 24,
         });
     }
 
-    async deleteChallenge(type: string) {
-        const userId = await this.getCurrentUserId();
+    async getCredentialsByUserId(userId: string) {
+        return await this.env.pubkeys.get(`user:${userId}`);
+    }
+
+    async setCredentialsForUserId(
+        userId: string,
+        credentials: Array<StoredCredential>
+    ) {
+        return await this.env.pubkeys.put(
+            `user:${userId}`,
+            toBase64Url(marshal(credentials)),
+            {
+                expirationTtl: 60 * 60 * 24,
+            }
+        );
+    }
+
+    async getCredentialsByKid(kid: string) {
+        const userId = await this.getUserIdByKid(kid);
         if (!userId) {
             return null;
         }
-        return await this.env.challenges.delete(`${userId}:${type}`);
-    }
-
-    async getCredentials(userId: string) {
-        return await this.env.pubkeys.get(userId);
+        const credentials = await this.getCredentialsByUserId(userId);
+        if (!credentials) {
+            return null;
+        }
+        return unmarshal(fromBase64Url(credentials)) as Array<StoredCredential>;
     }
 
     async getCurrentCredentials() {
@@ -117,7 +151,7 @@ export class Context {
         if (!userId) {
             return null;
         }
-        const credentials = await this.getCredentials(userId);
+        const credentials = await this.env.pubkeys.get(userId);
         if (!credentials) {
             return null;
         }
@@ -131,10 +165,16 @@ export class Context {
         }
         const storedCredentials = (await this.getCurrentCredentials()) ?? [];
         const combinedCredentials = [...storedCredentials, ...credentials];
-        return await this.env.pubkeys.put(
-            userId,
-            toBase64Url(marshal(combinedCredentials)),
-            { expirationTtl: 60 * 60 * 24 }
+        return await this.setCredentialsForUserId(userId, combinedCredentials);
+    }
+
+    async setKidForCurrentUser(credentials: Array<StoredCredential>) {
+        const userId = await this.getCurrentUserId();
+        if (!userId) {
+            return;
+        }
+        return await Promise.all(
+            credentials.map(({ kid }) => this.setUserIdForKid(kid, userId))
         );
     }
 

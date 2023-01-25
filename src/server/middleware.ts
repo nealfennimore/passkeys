@@ -23,10 +23,6 @@ export const hasUserId = async (request: IRequest, env: Env) => {
 export const maybeSetSession = async (request: IRequest, env: Env) => {
     const sessionId = request.ctx.sessionId;
     if (!request.ctx.hasSession) {
-        await request.ctx.setCurrentUserId(
-            sessionId,
-            request.ctx?.body?.userId
-        );
         request.ctx.headers = {
             'Set-Cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=None; Secure;`,
         };
