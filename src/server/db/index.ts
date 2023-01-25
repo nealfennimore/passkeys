@@ -38,7 +38,7 @@ export class DB {
         const { kid, pubkey, attestationObject, coseAlg } = payload;
 
         return this.D1.prepare(
-            'INSERT INTO public_keys(kid, pubkey, attestation_data, user_id) VALUES(?1, ?2, ?3, ?4)'
+            'INSERT INTO public_keys(kid, pubkey, attestation_data, cose_alg, user_id) VALUES(?1, ?2, ?3, ?4, ?5)'
         ).bind(
             kid,
             safeByteEncode(pubkey),
