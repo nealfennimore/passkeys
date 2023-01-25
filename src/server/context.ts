@@ -74,7 +74,9 @@ export class Context {
     }
 
     async setCurrentUserIdForSession(sessionId: string, userId: string) {
-        return await this.env.sessions.put(sessionId, userId);
+        return await this.env.sessions.put(sessionId, userId, {
+            expirationTtl: 60 * 60 * 24,
+        });
     }
 
     async getChallengeForSession(type: string) {

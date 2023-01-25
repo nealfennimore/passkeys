@@ -24,7 +24,9 @@ export const maybeSetSession = async (request: IRequest, env: Env) => {
     const sessionId = request.ctx.sessionId;
     if (!request.ctx.hasSession) {
         request.ctx.headers = {
-            'Set-Cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=None; Secure;`,
+            'Set-Cookie': `session_id=${sessionId}; Max-Age=${
+                60 * 60 * 24
+            }; Path=/; HttpOnly; SameSite=None; Secure;`,
         };
     }
 };
