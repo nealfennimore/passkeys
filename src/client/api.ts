@@ -1,6 +1,5 @@
-import { decode } from 'cbor-x/decode';
 import * as schema from '../server/schema.js';
-import { safeByteDecode } from '../utils.js';
+import { cborDecode, decode, safeByteDecode } from '../utils.js';
 
 const makeRequest = (endpoint: string, data: object = {}) =>
     fetch(
@@ -26,7 +25,10 @@ export namespace Attestation {
         const attestation =
             credential.response as AuthenticatorAttestationResponse;
 
-        console.log(decode(new Uint8Array(attestation.attestationObject)));
+        // DEBUG:
+        console.log(JSON.parse(decode(attestation.clientDataJSON)));
+        // DEBUG:
+        console.log(cborDecode(new Uint8Array(attestation.attestationObject)));
 
         const payload: schema.Attestation.StoreCredentialPayload = {
             kid: credential.id,
@@ -51,6 +53,12 @@ export namespace Assertion {
 
     export async function verify(credential: PublicKeyCredential) {
         const assertion = credential.response as AuthenticatorAssertionResponse;
+
+        // DEBUG:
+        console.log(JSON.parse(decode(assertion.clientDataJSON)));
+        // DEBUG:
+        console.log(decode(new Uint8Array(assertion.authenticatorData)));
+
         const payload: schema.Assertion.VerifyPayload = {
             kid: credential.id,
             clientDataJSON: safeByteDecode(assertion.clientDataJSON),

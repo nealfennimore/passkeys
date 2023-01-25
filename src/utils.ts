@@ -3,6 +3,8 @@ import {
     encode as _toBase64Url,
 } from '@cfworker/base64url';
 
+export { decode as cborDecode } from 'cbor-x/decode';
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 export const encode = encoder.encode.bind(encoder);
