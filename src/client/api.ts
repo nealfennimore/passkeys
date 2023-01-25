@@ -1,3 +1,4 @@
+import { decode } from 'cbor-x/decode';
 import * as schema from '../server/schema.js';
 import { safeByteDecode } from '../utils.js';
 
@@ -24,6 +25,8 @@ export namespace Attestation {
     export async function store(credential: PublicKeyCredential) {
         const attestation =
             credential.response as AuthenticatorAttestationResponse;
+
+        console.log(decode(new Uint8Array(attestation.attestationObject)));
 
         const payload: schema.Attestation.StoreCredentialPayload = {
             kid: credential.id,
