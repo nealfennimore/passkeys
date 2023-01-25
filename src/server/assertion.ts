@@ -88,11 +88,17 @@ export class Assertion {
                 ctx.db.getCredentialByKid(kid),
                 ctx.cache.getCurrentUserId(),
             ]);
-            if (userId !== stored.userId) {
-                throw new Error('User does not own key');
-            }
 
             const isVerified = await Assertion.verify(stored, payload);
+
+            // For case of multiple logins:
+            // Since the user owns the key and can verify it, reset the session to point to the stored key owner's id
+            if (isVerified && userId !== stored.userId) {
+                await ctx.cache.setCurrentUserIdForSession(
+                    ctx.cache.sessionId,
+                    stored.userId
+                );
+            }
             return response.json({ isVerified });
         } finally {
             await ctx.cache.deleteChallengeForSession(WebAuthnType.Get);
