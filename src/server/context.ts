@@ -4,6 +4,13 @@ import { safeDecode, safeEncode } from '../utils.js';
 import { Env } from './env';
 import * as schema from './schema';
 
+export interface DBCredential {
+    kid: string;
+    pubkey: Array<number>;
+    userId: string;
+    coseAlg: number;
+}
+
 export interface StoredCredential {
     kid: string;
     pubkey: ArrayBuffer;
@@ -133,11 +140,18 @@ export class Context {
     }
 
     async getCredentialByKid(kid: string) {
-        return (await this.env.DB.prepare(
+        const { pubkey, coseAlg, userId } = (await this.env.DB.prepare(
             'SELECT kid, pubkey, cose_alg as coseAlg, user_id as userId FROM public_keys WHERE kid = ?'
         )
             .bind(kid)
-            .first()) as StoredCredential;
+            .first()) as DBCredential;
+
+        return {
+            kid,
+            pubkey: new Uint8Array(pubkey).buffer,
+            coseAlg,
+            userId,
+        } as StoredCredential;
     }
 
     generateChallenge() {
