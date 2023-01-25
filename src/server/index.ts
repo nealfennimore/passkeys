@@ -48,7 +48,6 @@ router.post(
 router.post(
     '/assertion/generate',
     m.withContext,
-    m.setRequestBody,
     m.maybeSetSession,
     async (request) => {
         try {

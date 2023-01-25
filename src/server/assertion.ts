@@ -54,7 +54,7 @@ export class Assertion {
 
     static async generate(ctx: Context) {
         const challenge = await ctx.generateChallenge();
-        await ctx.setChallengeForSession(WebAuthnType.Get, challenge);
+        await ctx.cache.setChallengeForSession(WebAuthnType.Get, challenge);
 
         return response.json({ challenge }, ctx.headers);
     }
@@ -73,7 +73,7 @@ export class Assertion {
                 throw new Error('Wrong credential type');
             }
 
-            const storedChallenge = await ctx.getChallengeForSession(
+            const storedChallenge = await ctx.cache.getChallengeForSession(
                 WebAuthnType.Get
             );
             if (storedChallenge === null) {
@@ -84,8 +84,10 @@ export class Assertion {
                 throw new Error('Incorrect challenge');
             }
 
-            const stored = await ctx.getCredentialByKid(kid);
-            const userId = await ctx.getCurrentUserId();
+            const [stored, userId] = await Promise.all([
+                ctx.db.getCredentialByKid(kid),
+                ctx.cache.getCurrentUserId(),
+            ]);
             if (userId !== stored.userId) {
                 throw new Error('User does not own key');
             }
@@ -93,7 +95,7 @@ export class Assertion {
             const isVerified = await Assertion.verify(stored, payload);
             return response.json({ isVerified });
         } finally {
-            await ctx.deleteChallengeForSession(WebAuthnType.Get);
+            await ctx.cache.deleteChallengeForSession(WebAuthnType.Get);
         }
     }
 }

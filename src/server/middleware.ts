@@ -21,8 +21,8 @@ export const hasUserId = async (request: IRequest, env: Env) => {
 };
 
 export const maybeSetSession = async (request: IRequest, env: Env) => {
-    const sessionId = request.ctx.sessionId;
-    if (!request.ctx.hasSession) {
+    const sessionId = request.ctx.cache.sessionId;
+    if (!request.ctx.cache.hasSession) {
         request.ctx.headers = {
             'Set-Cookie': `session_id=${sessionId}; Max-Age=${
                 60 * 60 * 24
@@ -32,7 +32,7 @@ export const maybeSetSession = async (request: IRequest, env: Env) => {
 };
 
 export const requiresSession = (request: IRequest, env: Env) => {
-    if (!request.ctx.hasSession) {
+    if (!request.ctx.cache.hasSession) {
         return response.json({ error: 'Unauthorized' }, undefined, 401);
     }
 };

@@ -5,9 +5,12 @@ import * as schema from './schema';
 
 export class Attestation {
     static async generate(ctx: Context) {
-        await ctx.setCurrentUserIdForSession(ctx.sessionId, ctx?.body?.userId);
+        await ctx.cache.setCurrentUserIdForSession(
+            ctx.cache.sessionId,
+            ctx?.body?.userId
+        );
         const challenge = ctx.generateChallenge();
-        await ctx.setChallengeForSession(WebAuthnType.Create, challenge);
+        await ctx.cache.setChallengeForSession(WebAuthnType.Create, challenge);
 
         return response.json({ challenge }, ctx.headers);
     }
@@ -26,7 +29,7 @@ export class Attestation {
                 throw new Error('Wrong credential type');
             }
 
-            const storedChallenge = await ctx.getChallengeForSession(
+            const storedChallenge = await ctx.cache.getChallengeForSession(
                 WebAuthnType.Create
             );
             if (storedChallenge === null) {
@@ -37,21 +40,21 @@ export class Attestation {
                 throw new Error('Incorrect challenge');
             }
 
-            const userId = await ctx.getCurrentUserId();
+            const userId = await ctx.cache.getCurrentUserId();
             if (!userId) {
                 throw new Error('No user');
             }
 
-            await ctx.DB.batch([
-                ctx.createUser(userId),
-                ctx.createCredential(payload, userId),
+            await ctx.db.D1.batch([
+                ctx.db.createUser(userId),
+                ctx.db.createCredential(payload, userId),
             ]);
 
             return response.json({
                 kid,
             } as schema.Attestation.StoreCredentialResponse);
         } finally {
-            await ctx.deleteChallengeForSession(WebAuthnType.Create);
+            await ctx.cache.deleteChallengeForSession(WebAuthnType.Create);
         }
     }
 }
