@@ -71,6 +71,6 @@ export class DB {
             pubkey: Uint8Array.from(pubkey).buffer,
             attestationData: Uint8Array.from(attestation_data).buffer,
             userId,
-        } as StoredCredential;
+        } as StoredCredential | null;
     }
 }

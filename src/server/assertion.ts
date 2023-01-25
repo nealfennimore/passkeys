@@ -96,6 +96,14 @@ export class Assertion {
                 ctx.cache.getCurrentUserId(),
             ]);
 
+            if (!stored) {
+                throw new Error('Credential not found');
+            }
+
+            if (!userId) {
+                throw new Error('User not found');
+            }
+
             const isVerified = await Assertion.verify(stored, payload);
 
             // For case of multiple logins:
