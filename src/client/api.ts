@@ -1,5 +1,15 @@
 import * as schema from '../server/schema.js';
-import { safeByteDecode, safeDecode } from '../utils.js';
+import {
+    fromBase64Url,
+    safeByteDecode,
+    safeDecode,
+    toBase64Url,
+} from '../utils.js';
+
+// @ts-ignore
+window.fromBase64Url = fromBase64Url;
+// @ts-ignore
+window.toBase64Url = toBase64Url;
 
 const makeRequest = (endpoint: string, data: object = {}) =>
     fetch(
