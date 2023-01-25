@@ -1,6 +1,6 @@
 import { Request } from '@cloudflare/workers-types';
 import { parse } from 'cookie';
-import { safeDecode } from '../utils.js';
+import { safeDecode, safeEncode } from '../utils.js';
 import { Env } from './env';
 import * as schema from './schema';
 
@@ -123,7 +123,13 @@ export class Context {
         const { kid, pubkey, attestationObject, coseAlg } = payload;
         return this.env.DB.prepare(
             'INSERT INTO public_keys(kid, pubkey, attestation_data, cose_alg, user_id) VALUES(?1, ?2, ?3, ?4, ?5)'
-        ).bind(kid, pubkey, attestationObject, coseAlg, userId);
+        ).bind(
+            kid,
+            safeEncode(pubkey),
+            safeEncode(attestationObject),
+            coseAlg,
+            userId
+        );
     }
 
     async getCredentialByKid(kid: string) {
