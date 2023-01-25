@@ -10,20 +10,23 @@ export const withContext = (request: IRequest, env: Env) => {
 };
 
 export const setRequestBody = async (request: IRequest, env: Env) => {
+    const ctx: Context = request.ctx;
     const body = (await request.json()) as any;
-    request.ctx.body = body;
+    ctx.body = body;
 };
 
 export const hasUserId = async (request: IRequest, env: Env) => {
-    if (!request.ctx?.body?.userId) {
+    const ctx: Context = request.ctx;
+    if (!ctx?.body?.userId) {
         return response.json({ error: 'No user ID' }, undefined, 400);
     }
 };
 
 export const maybeSetSession = async (request: IRequest, env: Env) => {
-    const sessionId = request.ctx.cache.sessionId;
-    if (!request.ctx.cache.hasSession) {
-        request.ctx.headers = {
+    const ctx: Context = request.ctx;
+    const sessionId = ctx.cache.sessionId;
+    if (!ctx.cache.hasSession) {
+        ctx.headers = {
             'Set-Cookie': `session_id=${sessionId}; Max-Age=${
                 60 * 60 * 24
             }; Path=/; HttpOnly; SameSite=None; Secure;`,
@@ -32,7 +35,8 @@ export const maybeSetSession = async (request: IRequest, env: Env) => {
 };
 
 export const requiresSession = (request: IRequest, env: Env) => {
-    if (!request.ctx.cache.hasSession) {
+    const ctx: Context = request.ctx;
+    if (!ctx.cache.hasSession) {
         return response.json({ error: 'Unauthorized' }, undefined, 401);
     }
 };

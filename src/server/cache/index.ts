@@ -1,5 +1,6 @@
 import { Request } from '@cloudflare/workers-types';
 import { parse } from 'cookie';
+import { WebAuthnType } from '../../utils';
 import { Env } from '../env';
 
 export class Cache {
@@ -30,15 +31,21 @@ export class Cache {
         return cookie.session_id || null;
     }
 
-    async getSessionUserId(sessionId: string) {
-        return await this.env.sessions.get(sessionId);
-    }
-
     async getCurrentUserId() {
         return await this.getSessionUserId(this.sessionId);
     }
 
-    async getChallengeForSession(type: string) {
+    async getSessionUserId(sessionId: string) {
+        return await this.env.sessions.get(sessionId);
+    }
+
+    async setCurrentUserIdForSession(sessionId: string, userId: string) {
+        return await this.env.sessions.put(sessionId, userId, {
+            expirationTtl: 60 * 60 * 24,
+        });
+    }
+
+    async getChallengeForSession(type: WebAuthnType) {
         const sessionId = this.sessionId;
         if (!sessionId) {
             return null;
@@ -46,7 +53,7 @@ export class Cache {
         return await this.env.challenges.get(`${sessionId}:${type}`);
     }
 
-    async setChallengeForSession(type: string, challenge: string) {
+    async setChallengeForSession(type: WebAuthnType, challenge: string) {
         const sessionId = this.sessionId;
         if (!sessionId) {
             return null;
@@ -60,17 +67,11 @@ export class Cache {
         );
     }
 
-    async deleteChallengeForSession(type: string) {
+    async deleteChallengeForSession(type: WebAuthnType) {
         const sessionId = this.sessionId;
         if (!sessionId) {
             return null;
         }
         return await this.env.challenges.delete(`${sessionId}:${type}`);
-    }
-
-    async setCurrentUserIdForSession(sessionId: string, userId: string) {
-        return await this.env.sessions.put(sessionId, userId, {
-            expirationTtl: 60 * 60 * 24,
-        });
     }
 }
