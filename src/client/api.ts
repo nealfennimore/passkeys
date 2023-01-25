@@ -1,17 +1,5 @@
 import * as schema from '../server/schema.js';
-import {
-    fromBase64Url,
-    safeByteDecode,
-    safeDecode,
-    toBase64Url,
-} from '../utils.js';
-
-// DEBUG:
-// @ts-ignore
-window.fromBase64Url = fromBase64Url;
-// DEBUG:
-// @ts-ignore
-window.toBase64Url = toBase64Url;
+import { safeByteDecode } from '../utils.js';
 
 const makeRequest = (endpoint: string, data: object = {}) =>
     fetch(
@@ -44,16 +32,6 @@ export namespace Attestation {
             pubkey: safeByteDecode(attestation.getPublicKey() as ArrayBuffer),
             coseAlg: attestation.getPublicKeyAlgorithm(),
         };
-
-        // DEBUG:
-        // @ts-ignore
-        window.pubkey = attestation.getPublicKey();
-        // DEBUG:
-        // @ts-ignore
-        window.pubkey64 = safeDecode(attestation.getPublicKey() as ArrayBuffer);
-        // DEBUG:
-        // @ts-ignore
-        console.log(window.pubkey, window.pubkey64);
 
         const response = await makeRequest('attestation/store', payload);
         return (await response.json()) as schema.Attestation.StoreCredentialResponse;
