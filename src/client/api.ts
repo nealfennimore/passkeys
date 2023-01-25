@@ -33,6 +33,14 @@ export namespace Attestation {
             coseAlg: attestation.getPublicKeyAlgorithm(),
         };
 
+        // @ts-ignore
+        window.pubkey = attestation.getPublicKey();
+        // @ts-ignore
+        window.pubkey64 = safeDecode(attestation.getPublicKey() as ArrayBuffer);
+
+        // @ts-ignore
+        console.log(window.pubkey, window.pubkey64);
+
         const response = await makeRequest('attestation/store', payload);
         return (await response.json()) as schema.Attestation.StoreCredentialResponse;
     }
