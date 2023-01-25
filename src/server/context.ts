@@ -119,10 +119,10 @@ export class Context {
         payload: schema.Attestation.StoreCredentialPayload,
         userId: string
     ) {
-        const { kid, jwk, attestationObject } = payload;
+        const { kid, pubkey, attestationObject, coseAlg } = payload;
         return this.env.DB.prepare(
-            'INSERT INTO public_keys(kid, jwk, attestation_data, user_id) VALUES(?1, ?2, ?3, ?4)'
-        ).bind(kid, jwk, attestationObject, userId);
+            'INSERT INTO public_keys(kid, pubkey, attestation_data, cose_alg, user_id) VALUES(?1, ?2, ?3, ?4, ?5)'
+        ).bind(kid, pubkey, attestationObject, coseAlg, userId);
     }
 
     async getCredentialByKid(kid: string) {

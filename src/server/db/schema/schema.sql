@@ -9,9 +9,10 @@ DROP TABLE IF EXISTS public_keys;
 
 CREATE TABLE public_keys (
     kid TEXT PRIMARY KEY,
-    jwk JSON NOT NULL,
-    attestation_data TEXT,
-    user_id INT,
+    cose_alg INT NOT NULL,
+    pubkey BLOB NOT NULL,
+    attestation_data BLOB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );

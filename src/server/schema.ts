@@ -20,7 +20,8 @@ export namespace Attestation {
         kid: string;
         clientDataJSON: string;
         attestationObject: string;
-        jwk: JsonWebKey;
+        pubkey: string;
+        coseAlg: number;
     };
 
     export type StoreCredentialResponse = {

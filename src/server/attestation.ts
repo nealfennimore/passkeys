@@ -17,7 +17,7 @@ export class Attestation {
         payload: schema.Attestation.StoreCredentialPayload
     ) {
         try {
-            const { clientDataJSON, kid, jwk, attestationObject } = payload;
+            const { clientDataJSON, kid } = payload;
             const { challenge, type } = unmarshal(
                 fromBase64Url(clientDataJSON)
             ) as schema.ClientDataJSON;
