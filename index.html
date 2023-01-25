@@ -6,32 +6,41 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Passkeys</title>
+    <link rel="stylesheet" href="/3e8c3fd7cdf16c561036d55540fcf7ed152068a3a5b265389c13f01a78e3cc6a.app.css">
 
-    <script defer type="module" src="/7faf82d405bcb77feaee9f7867d35fed768c2c61a085ee5d769b1d5cae6d2f1e.bundle.js"></script>
-
+    <script defer type="module" src="/20cfac4d2e168ade7be33669dab94a0a91a0d2b8575efc468f657062acbd4a85.bundle.js"></script>
 </head>
 
 <body>
+    <main class="grid h-screen place-items-center">
+        <section class="flex flex-col space-y-4">
+            <form id="passkeys" class="flex flex-col space-y-4">
+                <fieldset>
+                    <label class="block">
+                        <span class="block text-sm font-medium text-slate-700">Username</span>
+                        <input class="block rounded w-full" type="text" name="username" autocomplete="username webauthn"
+                            required>
+                    </label>
+                </fieldset>
 
-    <form id="passkeys">
-        <fieldset>
-            <label for="username">Username</label>
-            <input type="text" name="username" placeholder="Username" autocomplete="username webauthn" required>
-        </fieldset>
-    
-        <button type="button" id="signup">
-            <span>Signup</span>
-        </button>
-        <button type="button" id="login">
-            <span>Login</span>
-        </button>
-        <button type="button" id="cancel">
-            <span>Cancel</span>
-        </button>
-    </form>
+                <div class="inline-flex rounded-md" role="group">
+                    <button type="button" id="signup"
+                        class="bg-slate-700 px-4 py-2 text-sm font-medium text-white bg-white border border-slate-500 rounded-l-lg">
+                        <span>Signup</span>
+                    </button>
+                    <button type="button" id="login"
+                        class="bg-slate-700 px-4 py-2 text-sm font-medium text-white bg-white border border-slate-500 rounded-r-md">
+                        <span>Login</span>
+                    </button>
+                </div>
+            </form>
 
-
-    <textarea id="output" rows="10" cols="80" readonly></textarea>
+            <label class="block">
+                <span class="block text-sm font-medium text-slate-700">Output</span>
+                <textarea class="block rounded w-full" id="output" readonly></textarea>
+            </label>
+        </section>
+    </main>
 </body>
 
 </html>
