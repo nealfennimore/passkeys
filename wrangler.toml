@@ -13,5 +13,4 @@ routes = []
 [[ d1_databases ]]
 binding = "DB"
 database_name = "passkeys"
-database_id = "e9bebaa7-8e76-4710-b767-b92411d87a69"
-
+database_id = "aad42108-61a4-4d6d-b665-9df8e6fc22f2"

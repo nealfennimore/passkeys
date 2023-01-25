@@ -9,7 +9,6 @@ DROP TABLE IF EXISTS public_keys;
 
 CREATE TABLE public_keys (
     kid TEXT PRIMARY KEY,
-    cose_alg INT NOT NULL,
     pubkey BLOB NOT NULL,
     attestation_data BLOB,
     user_id TEXT,
