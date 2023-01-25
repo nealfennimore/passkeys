@@ -37,11 +37,10 @@ export function escape(str: string) {
     return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-export const marshal = JSON.stringify;
-export const unmarshal = JSON.parse;
-
 export const toBase64Url = _toBase64Url;
 export const fromBase64Url = _fromBase64Url;
+export const marshal = (data: object) => toBase64Url(JSON.stringify(data));
+export const unmarshal = (data: string) => JSON.parse(fromBase64Url(data));
 
 export const safeEncode = (data: string) => encode(fromBase64Url(data));
 export const safeDecode = (data: ArrayBuffer) => toBase64Url(decode(data));

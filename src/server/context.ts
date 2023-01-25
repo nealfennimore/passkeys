@@ -128,8 +128,12 @@ export class Context {
         userId: string
     ) {
         const { kid, pubkey, attestationObject, coseAlg } = payload;
+        // DEBUG:
         console.log(`BASE64 ${pubkey}`);
-        console.log(`ENCODED ${safeByteEncode(pubkey)}`);
+        // DEBUG:
+        console.log(
+            `BUFFER ${Array.from(new Uint8Array(safeByteEncode(pubkey)))}`
+        );
 
         return this.env.DB.prepare(
             'INSERT INTO public_keys(kid, pubkey, attestation_data, cose_alg, user_id) VALUES(?1, ?2, ?3, ?4, ?5)'
@@ -148,9 +152,10 @@ export class Context {
         )
             .bind(kid)
             .first()) as DBCredential;
-
+        // DEBUG:
         console.log(`BASE64 ${safeByteDecode(Uint8Array.from(pubkey))}`);
-        console.log(`ENCODED ${pubkey}`);
+        // DEBUG:
+        console.log(`BUFFER ${Array.from(new Uint8Array(pubkey))}`);
 
         return {
             kid,

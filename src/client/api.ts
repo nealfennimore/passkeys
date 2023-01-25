@@ -6,8 +6,10 @@ import {
     toBase64Url,
 } from '../utils.js';
 
+// DEBUG:
 // @ts-ignore
 window.fromBase64Url = fromBase64Url;
+// DEBUG:
 // @ts-ignore
 window.toBase64Url = toBase64Url;
 
@@ -37,17 +39,19 @@ export namespace Attestation {
 
         const payload: schema.Attestation.StoreCredentialPayload = {
             kid: credential.id,
-            clientDataJSON: safeDecode(attestation.clientDataJSON),
+            clientDataJSON: safeByteDecode(attestation.clientDataJSON),
             attestationObject: safeByteDecode(attestation.attestationObject),
             pubkey: safeByteDecode(attestation.getPublicKey() as ArrayBuffer),
             coseAlg: attestation.getPublicKeyAlgorithm(),
         };
 
+        // DEBUG:
         // @ts-ignore
         window.pubkey = attestation.getPublicKey();
+        // DEBUG:
         // @ts-ignore
         window.pubkey64 = safeDecode(attestation.getPublicKey() as ArrayBuffer);
-
+        // DEBUG:
         // @ts-ignore
         console.log(window.pubkey, window.pubkey64);
 
@@ -69,9 +73,9 @@ export namespace Assertion {
         const assertion = credential.response as AuthenticatorAssertionResponse;
         const payload: schema.Assertion.VerifyPayload = {
             kid: credential.id,
-            clientDataJSON: safeDecode(assertion.clientDataJSON),
-            authenticatorData: safeDecode(assertion.authenticatorData),
-            signature: safeDecode(assertion.signature),
+            clientDataJSON: safeByteDecode(assertion.clientDataJSON),
+            authenticatorData: safeByteDecode(assertion.authenticatorData),
+            signature: safeByteDecode(assertion.signature),
         };
         const response = await makeRequest('assertion/verify', payload);
         return (await response.json()) as schema.Assertion.VerifyResponse;

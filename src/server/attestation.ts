@@ -1,4 +1,4 @@
-import { fromBase64Url, unmarshal, WebAuthnType } from '../utils';
+import { unmarshal, WebAuthnType } from '../utils';
 import { Context } from './context';
 import * as response from './response';
 import * as schema from './schema';
@@ -19,7 +19,7 @@ export class Attestation {
         try {
             const { clientDataJSON, kid } = payload;
             const { challenge, type } = unmarshal(
-                fromBase64Url(clientDataJSON)
+                clientDataJSON
             ) as schema.ClientDataJSON;
 
             if (type !== WebAuthnType.Create) {

@@ -6,8 +6,7 @@ import {
 } from '../crypto';
 import {
     concatBuffer,
-    fromBase64Url,
-    safeEncode,
+    safeByteEncode,
     unmarshal,
     WebAuthnType,
 } from '../utils';
@@ -21,10 +20,17 @@ export class Assertion {
         payload: schema.Assertion.VerifyPayload
     ) {
         const { coseAlg, pubkey } = stored;
+        // DEBUG:
         console.log(Array.from(new Uint8Array(pubkey)));
+        // DEBUG:
         console.log(stored.pubkey.byteLength);
         const signingAlg = COSEAlgToSigningAlg[coseAlg];
-        console.log(coseAlg, signingAlg, COSEAlgToSigningCurve[coseAlg]);
+        // DEBUG:
+        console.log(coseAlg);
+        // DEBUG:
+        console.log(signingAlg);
+        // DEBUG:
+        console.log(COSEAlgToSigningCurve[coseAlg]);
         const key = await Crypto.toCryptoKey(
             pubkey,
             signingAlg,
@@ -32,9 +38,9 @@ export class Assertion {
         );
         const digestAlg = COSEAlgToDigest[coseAlg];
 
-        const signature = safeEncode(payload.signature);
-        const authenticatorData = safeEncode(payload.authenticatorData);
-        const clientDataJSON = safeEncode(payload.clientDataJSON);
+        const signature = safeByteEncode(payload.signature);
+        const authenticatorData = safeByteEncode(payload.authenticatorData);
+        const clientDataJSON = safeByteEncode(payload.clientDataJSON);
 
         // Convert from DER ASN.1 encoding to Raw ECDSA signature
         const offset = new Uint8Array(signature)[4] === 0 ? 1 : 0;
@@ -70,7 +76,7 @@ export class Assertion {
         try {
             const { clientDataJSON, kid } = payload;
             const { challenge, type } = unmarshal(
-                fromBase64Url(clientDataJSON)
+                clientDataJSON
             ) as schema.ClientDataJSON;
 
             if (type !== WebAuthnType.Get) {

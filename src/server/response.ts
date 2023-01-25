@@ -1,5 +1,3 @@
-import { marshal } from '../utils';
-
 export const corsHeaders = {
     'Access-Control-Allow-Origin': 'https://passkeys.neal.codes',
     'Access-Control-Allow-Methods': 'POST,OPTIONS',
@@ -12,7 +10,7 @@ export const json = (
     headers: Record<string, string> = {},
     statusCode = 200
 ) => {
-    return new Response(marshal(data), {
+    return new Response(JSON.stringify(data), {
         status: statusCode,
         headers: {
             ...headers,
