@@ -1,4 +1,4 @@
-import { unmarshal, WebAuthnType } from '../utils';
+import { unmarshal, WebAuthnOrigin, WebAuthnType } from '../utils';
 import { Context } from './context';
 import * as response from './response';
 import * as schema from './schema';
@@ -21,12 +21,16 @@ export class Attestation {
     ) {
         try {
             const { clientDataJSON, kid } = payload;
-            const { challenge, type } = unmarshal(
+            const { challenge, type, origin } = unmarshal(
                 clientDataJSON
             ) as schema.ClientDataJSON;
 
             if (type !== WebAuthnType.Create) {
                 throw new Error('Wrong credential type');
+            }
+
+            if (origin !== WebAuthnOrigin) {
+                throw new Error('Key generated from wrong origin');
             }
 
             const storedChallenge = await ctx.cache.getChallengeForSession(

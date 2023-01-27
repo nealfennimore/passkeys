@@ -8,6 +8,7 @@ import {
     concatBuffer,
     safeByteEncode,
     unmarshal,
+    WebAuthnOrigin,
     WebAuthnType,
 } from '../utils';
 import { Context, StoredCredential } from './context';
@@ -65,12 +66,16 @@ export class Assertion {
     ) {
         try {
             const { clientDataJSON, kid } = payload;
-            const { challenge, type } = unmarshal(
+            const { challenge, type, origin } = unmarshal(
                 clientDataJSON
             ) as schema.ClientDataJSON;
 
             if (type !== WebAuthnType.Get) {
                 throw new Error('Wrong credential type');
+            }
+
+            if (origin !== WebAuthnOrigin) {
+                throw new Error('Key generated from wrong origin');
             }
 
             const storedChallenge = await ctx.cache.getChallengeForSession(
