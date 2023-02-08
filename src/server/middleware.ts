@@ -22,14 +22,13 @@ export const hasUserId = async (request: IRequest, env: Env) => {
     }
 };
 
+const maxAge = 60 * 60 * 24;
 export const maybeSetSession = async (request: IRequest, env: Env) => {
     const ctx: Context = request.ctx;
     const sessionId = ctx.cache.sessionId;
     if (!ctx.cache.hasSession) {
         ctx.headers = {
-            'Set-Cookie': `session_id=${sessionId}; Max-Age=${
-                60 * 60 * 24
-            }; Path=/; HttpOnly; SameSite=None; Secure;`,
+            'Set-Cookie': `session_id=${sessionId}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=None; Secure;`,
         };
     }
 };
