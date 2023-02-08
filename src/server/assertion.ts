@@ -11,7 +11,8 @@ import {
     WebAuthnOrigin,
     WebAuthnType,
 } from '../utils';
-import { Context, StoredCredential } from './context';
+import { Context } from './context';
+import { StoredCredential } from './db';
 import * as response from './response';
 import * as schema from './schema';
 
