@@ -22,6 +22,7 @@ sequenceDiagram
 	participant S as Server
 
 
+	note over C, S: API /attestation/generate
 	C ->> S: Get a challenge
 	S -->> C: Receive challenge
 
@@ -29,6 +30,7 @@ sequenceDiagram
 	note right of A: Authenticator stores private key
 	A -->> C: Return public key
 
+	note over C, S: API /attestation/store
 	C ->> S: Send pubkey and challenge
 	note left of S: Store pubkey
 	S -->> C: Success
@@ -42,12 +44,14 @@ sequenceDiagram
 	participant C as Client
 	participant S as Server
 
+	note over C, S: API /assertion/generate
 	C ->> S: Get a challenge
 	S -->> C: Receive challenge
 
 	C ->> A: Send challenge to use for signing
 	A -->> C: Return signature
 
+	note over C, S: API /assertion/verify
 	C ->> S: Send signature
 	note left of S: Server verifies signature
 	S -->> C: Successfully verified
