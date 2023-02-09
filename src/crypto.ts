@@ -1,3 +1,5 @@
+import { byteStringToBuffer } from './utils';
+
 export enum Digests {
     SHA256 = 'SHA-256',
     SHA384 = 'SHA-384',
@@ -39,6 +41,11 @@ export const COSEAlgToSigningAlg = {
     [COSEAlgorithm.ES256.toString()]: SigningAlg.ECDSA,
     [COSEAlgorithm.ES384.toString()]: SigningAlg.ECDSA,
     [COSEAlgorithm.ES512.toString()]: SigningAlg.ECDSA,
+};
+
+export const stringTimingSafeEqual = (a: string, b: string): boolean => {
+    // @ts-ignore
+    return crypto.timingSafeEqual(byteStringToBuffer(a), byteStringToBuffer(b));
 };
 
 export class Crypto {

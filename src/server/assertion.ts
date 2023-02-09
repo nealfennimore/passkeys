@@ -3,6 +3,7 @@ import {
     COSEAlgToSigningAlg,
     COSEAlgToSigningCurve,
     Crypto,
+    stringTimingSafeEqual,
 } from '../crypto';
 import {
     concatBuffer,
@@ -86,7 +87,7 @@ export class Assertion {
                 throw new Error('Must regenerate challenge');
             }
 
-            if (challenge !== storedChallenge) {
+            if (!stringTimingSafeEqual(challenge, storedChallenge)) {
                 throw new Error('Incorrect challenge');
             }
 

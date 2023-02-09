@@ -1,3 +1,4 @@
+import { stringTimingSafeEqual } from '../crypto';
 import { unmarshal, WebAuthnOrigin, WebAuthnType } from '../utils';
 import { Context } from './context';
 import * as response from './response';
@@ -40,7 +41,7 @@ export class Attestation {
                 throw new Error('Must regenerate challenge');
             }
 
-            if (challenge !== storedChallenge) {
+            if (!stringTimingSafeEqual(challenge, storedChallenge)) {
                 throw new Error('Incorrect challenge');
             }
 
