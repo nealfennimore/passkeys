@@ -3,7 +3,7 @@ import { cborDecode, decode, safeByteDecode } from '../utils.js';
 
 const makeRequest = (endpoint: string, data: object = {}) =>
     fetch(
-        new Request(`https://api.passkeys.workers.dev/${endpoint}`, {
+        new Request(`https://api.passkeys.neal.codes/${endpoint}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
