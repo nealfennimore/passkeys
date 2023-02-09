@@ -5,13 +5,8 @@ import {
     Crypto,
     stringTimingSafeEqual,
 } from '../crypto';
-import {
-    concatBuffer,
-    safeByteEncode,
-    unmarshal,
-    WebAuthnOrigin,
-    WebAuthnType,
-} from '../utils';
+import { concatBuffer, safeByteEncode, unmarshal } from '../utils';
+import { WebAuthnOrigin, WebAuthnType } from './constants';
 import { Context } from './context';
 import { StoredCredential } from './db';
 import * as response from './response';

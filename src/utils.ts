@@ -10,10 +10,10 @@ const decoder = new TextDecoder();
 export const encode = encoder.encode.bind(encoder);
 export const decode = decoder.decode.bind(decoder);
 
-const byteStringToBuffer = (byteString: string) =>
+export const byteStringToBuffer = (byteString: string) =>
     Uint8Array.from(byteString, (e) => e.charCodeAt(0)).buffer;
 
-const bufferToByteString = (buffer: ArrayBuffer) =>
+export const bufferToByteString = (buffer: ArrayBuffer) =>
     String.fromCharCode(...new Uint8Array(buffer));
 
 export const toBase64Url = _toBase64Url;
@@ -41,10 +41,3 @@ const UUID_V4_REGEX =
 export function isUUIDv4(uuid: string) {
     return UUID_V4_REGEX.test(uuid);
 }
-
-export enum WebAuthnType {
-    Create = 'webauthn.create',
-    Get = 'webauthn.get',
-}
-
-export const WebAuthnOrigin = 'https://passkeys.neal.codes';

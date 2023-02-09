@@ -1,6 +1,6 @@
 import { Request } from '@cloudflare/workers-types';
 import { parse } from 'cookie';
-import { WebAuthnType } from '../../utils';
+import { WebAuthnType } from '../constants';
 import { Env } from '../env';
 
 export class Cache {

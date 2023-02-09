@@ -1,5 +1,6 @@
 import { stringTimingSafeEqual } from '../crypto';
-import { unmarshal, WebAuthnOrigin, WebAuthnType } from '../utils';
+import { unmarshal } from '../utils';
+import { WebAuthnOrigin, WebAuthnType } from './constants';
 import { Context } from './context';
 import * as response from './response';
 import * as schema from './schema';
