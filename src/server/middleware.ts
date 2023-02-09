@@ -1,5 +1,6 @@
 import { Request } from '@cloudflare/workers-types';
 import { IRequest } from 'itty-router';
+import { isUUIDv4 } from '../utils.js';
 import { Context } from './context';
 import { Env } from './env';
 import * as response from './response';
@@ -15,10 +16,14 @@ export const setRequestBody = async (request: IRequest, env: Env) => {
     ctx.body = body;
 };
 
-export const hasUserId = async (request: IRequest, env: Env) => {
+export const hasValidUserId = async (request: IRequest, env: Env) => {
     const ctx: Context = request.ctx;
-    if (!ctx?.body?.userId) {
-        return response.json({ error: 'No user ID' }, undefined, 400);
+    if (!(ctx?.body?.userId && isUUIDv4(ctx?.body?.userId))) {
+        return response.json(
+            { error: 'Invalid user ID. Must be UUID v4' },
+            undefined,
+            400
+        );
     }
 };
 

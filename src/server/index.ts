@@ -40,7 +40,7 @@ router.post(
     '/attestation/generate',
     m.withContext,
     m.setRequestBody,
-    m.hasUserId,
+    m.hasValidUserId,
     m.maybeSetSession,
     async (request) => {
         try {

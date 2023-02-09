@@ -35,6 +35,13 @@ export function concatBuffer(buffer1: ArrayBuffer, buffer2: ArrayBuffer) {
     return tmp.buffer;
 }
 
+const UUID_V4_REGEX =
+    /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+
+export function isUUIDv4(uuid: string) {
+    return UUID_V4_REGEX.test(uuid);
+}
+
 export enum WebAuthnType {
     Create = 'webauthn.create',
     Get = 'webauthn.get',
