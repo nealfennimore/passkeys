@@ -26,6 +26,12 @@ export const hasValidUserId = async (request: IRequest, env: Env) => {
         );
     }
 };
+export const userDoesNotAlreadyExist = async (request: IRequest, env: Env) => {
+    const ctx: Context = request.ctx;
+    if (await ctx?.db.hasUser(ctx?.body?.userId)) {
+        return response.json({ error: 'User already exists' }, undefined, 400);
+    }
+};
 
 const maxAge = 60 * 60 * 24;
 export const maybeSetSession = async (request: IRequest, env: Env) => {

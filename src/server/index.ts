@@ -41,6 +41,7 @@ router.post(
     m.withContext,
     m.setRequestBody,
     m.hasValidUserId,
+    m.userDoesNotAlreadyExist,
     m.maybeSetSession,
     async (request) => {
         try {

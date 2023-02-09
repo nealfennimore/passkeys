@@ -16,6 +16,10 @@ export interface StoredCredential {
     coseAlg: number;
 }
 
+export interface DBUser {
+    id: string;
+}
+
 export class DB {
     private env: Env;
 
@@ -29,6 +33,16 @@ export class DB {
 
     createUser(userId: string) {
         return this.D1.prepare('INSERT INTO users(id) VALUES(?)').bind(userId);
+    }
+
+    async hasUser(userId: string) {
+        const user = (await this.D1.prepare(
+            'SELECT id FROM users WHERE id = ? LIMIT 1'
+        )
+            .bind(userId)
+            .first()) as DBUser | null;
+
+        return user?.id === userId;
     }
 
     createCredential(
