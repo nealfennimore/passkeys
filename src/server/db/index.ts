@@ -7,6 +7,7 @@ export interface DBCredential {
     pubkey: Array<number>;
     userId: string;
     coseAlg: number;
+    signCounter: Array<number> | null;
 }
 
 export interface StoredCredential {
@@ -14,6 +15,7 @@ export interface StoredCredential {
     pubkey: ArrayBuffer;
     userId: string;
     coseAlg: number;
+    signCounter: ArrayBuffer | null;
 }
 
 export interface DBUser {
@@ -62,9 +64,15 @@ export class DB {
         );
     }
 
+    updateCredentialSigningCounter(kid: string, signCounter: ArrayBuffer) {
+        return this.D1.prepare(
+            'UPDATE public_keys SET sign_counter = ?1 WHERE kid = ?2'
+        ).bind(signCounter, kid);
+    }
+
     async getCredentialByKid(kid: string) {
-        const { pubkey, coseAlg, userId } = (await this.D1.prepare(
-            'SELECT kid, pubkey, cose_alg as coseAlg, user_id as userId FROM public_keys WHERE kid = ?'
+        const { pubkey, coseAlg, userId, signCounter } = (await this.D1.prepare(
+            'SELECT kid, pubkey, cose_alg as coseAlg, user_id as userId, sign_counter as signCounter FROM public_keys WHERE kid = ?'
         )
             .bind(kid)
             .first()) as DBCredential;
@@ -74,6 +82,9 @@ export class DB {
             pubkey: Uint8Array.from(pubkey).buffer,
             coseAlg,
             userId,
+            signCounter: signCounter
+                ? Uint8Array.from(signCounter).buffer
+                : null,
         } as StoredCredential | null;
     }
 }

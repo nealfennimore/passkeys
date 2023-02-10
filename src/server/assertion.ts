@@ -5,7 +5,12 @@ import {
     Crypto,
     stringTimingSafeEqual,
 } from '../crypto';
-import { concatBuffer, safeByteEncode, unmarshal } from '../utils';
+import {
+    concatBuffer,
+    isBiggerBuffer,
+    safeByteEncode,
+    unmarshal,
+} from '../utils';
 import { WebAuthnOrigin, WebAuthnType } from './constants';
 import { Context } from './context';
 import { StoredCredential } from './db';
@@ -67,6 +72,9 @@ export class Assertion {
                 clientDataJSON
             ) as schema.ClientDataJSON;
 
+            const authenticatorData = safeByteEncode(payload.authenticatorData);
+            const signCounter = authenticatorData.slice(33, 37);
+
             if (type !== WebAuthnType.Get) {
                 throw new Error('Wrong credential type');
             }
@@ -100,6 +108,18 @@ export class Assertion {
             }
 
             const isVerified = await Assertion.verify(stored, payload);
+            if (!isVerified) {
+                throw new Error('Invalid signature');
+            }
+
+            // Ensure the counter has been incremented
+            if (
+                stored?.signCounter &&
+                !isBiggerBuffer(signCounter, stored?.signCounter)
+            ) {
+                throw new Error('Signing counter value invalid');
+            }
+            await ctx.db.updateCredentialSigningCounter(kid, signCounter);
 
             // For case of multiple logins:
             // Since the user owns the key and can verify it, reset the session to point to the stored key owner's id

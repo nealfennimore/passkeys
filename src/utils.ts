@@ -35,6 +35,23 @@ export function concatBuffer(buffer1: ArrayBuffer, buffer2: ArrayBuffer) {
     return tmp.buffer;
 }
 
+export function isBiggerBuffer(a: ArrayBuffer, b: ArrayBuffer) {
+    let dfA = new DataView(a);
+    let dfB = new DataView(b);
+
+    if (dfA.byteLength > dfB.byteLength) {
+        return true;
+    }
+
+    for (let i = 0; i < dfA.byteLength; i++) {
+        if (dfA.getUint8(i) > dfB.getUint8(i)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 const UUID_V4_REGEX =
     /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
