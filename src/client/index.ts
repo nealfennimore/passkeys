@@ -24,6 +24,9 @@ if (
             return dom.form.reportValidity();
         }
 
+        if (dom.output) {
+            dom.output.value = '';
+        }
         const response = await fn(abortController, username);
         if (dom.output) {
             dom.output.value = JSON.stringify(response, undefined, 4);
