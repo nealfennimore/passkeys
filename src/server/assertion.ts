@@ -8,10 +8,15 @@ import {
 import {
     concatBuffer,
     isBiggerBuffer,
+    isEqualBuffer,
     safeByteEncode,
     unmarshal,
 } from '../utils';
-import { WebAuthnOrigin, WebAuthnType } from './constants';
+import {
+    WebAuthnOrigin,
+    WebAuthnOriginSHA256Hash,
+    WebAuthnType,
+} from './constants';
 import { Context } from './context';
 import { StoredCredential } from './db';
 import * as response from './response';
@@ -73,13 +78,16 @@ export class Assertion {
             ) as schema.ClientDataJSON;
 
             const authenticatorData = safeByteEncode(payload.authenticatorData);
-            const signCounter = authenticatorData.slice(33, 37);
+            const rpIdHash = authenticatorData.slice(0, 32);
 
             if (type !== WebAuthnType.Get) {
                 throw new Error('Wrong credential type');
             }
 
-            if (origin !== WebAuthnOrigin) {
+            if (
+                origin !== WebAuthnOrigin ||
+                !isEqualBuffer(rpIdHash, WebAuthnOriginSHA256Hash)
+            ) {
                 throw new Error('Key generated from wrong origin');
             }
 
@@ -112,6 +120,7 @@ export class Assertion {
                 throw new Error('Invalid signature');
             }
 
+            const signCounter = authenticatorData.slice(33, 37);
             // Ensure the signing counter has been incremented
             if (
                 stored?.signCounter &&

@@ -36,20 +36,37 @@ export function concatBuffer(buffer1: ArrayBuffer, buffer2: ArrayBuffer) {
 }
 
 export function isBiggerBuffer(a: ArrayBuffer, b: ArrayBuffer) {
-    let dfA = new DataView(a);
-    let dfB = new DataView(b);
+    const dvA = new DataView(a);
+    const dvB = new DataView(b);
 
-    if (dfA.byteLength > dfB.byteLength) {
+    if (dvA.byteLength > dvB.byteLength) {
         return true;
     }
 
-    for (let i = 0; i < dfA.byteLength; i++) {
-        if (dfA.getUint8(i) > dfB.getUint8(i)) {
+    for (let i = 0; i < dvA.byteLength; i++) {
+        if (dvA.getUint8(i) > dvB.getUint8(i)) {
             return true;
         }
     }
 
     return false;
+}
+
+export function isEqualBuffer(a: ArrayBuffer, b: ArrayBuffer) {
+    const dvA = new DataView(a);
+    const dvB = new DataView(b);
+
+    if (dvA.byteLength !== dvB.byteLength) {
+        return false;
+    }
+
+    for (let i = 0; i < dvA.byteLength; i++) {
+        if (dvA.getUint8(i) !== dvB.getUint8(i)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 const UUID_V4_REGEX =
