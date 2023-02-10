@@ -7,5 +7,7 @@ export enum WebAuthnType {
 
 export const WebAuthnOrigin = 'https://passkeys.neal.codes';
 
-export const WebAuthnOriginSHA256Hash = (async () =>
-    await crypto.subtle.digest('SHA-256', encode(WebAuthnOrigin)))();
+export const WebAuthnOriginSHA256Hash = crypto.subtle.digest(
+    'SHA-256',
+    encode(WebAuthnOrigin)
+);

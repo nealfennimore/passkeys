@@ -86,7 +86,7 @@ export class Assertion {
 
             if (
                 origin !== WebAuthnOrigin ||
-                !isEqualBuffer(rpIdHash, WebAuthnOriginSHA256Hash)
+                !isEqualBuffer(rpIdHash, await WebAuthnOriginSHA256Hash)
             ) {
                 throw new Error('Key generated from wrong origin');
             }
