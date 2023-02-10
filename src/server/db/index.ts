@@ -64,10 +64,15 @@ export class DB {
         );
     }
 
-    updateCredentialSigningCounter(kid: string, signCounter: ArrayBuffer) {
-        return this.D1.prepare(
+    async updateCredentialSigningCounter(
+        kid: string,
+        signCounter: ArrayBuffer
+    ) {
+        return await this.D1.prepare(
             'UPDATE public_keys SET sign_counter = ?1 WHERE kid = ?2'
-        ).bind(signCounter, kid);
+        )
+            .bind(signCounter, kid)
+            .run();
     }
 
     async getCredentialByKid(kid: string) {
