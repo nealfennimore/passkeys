@@ -45,7 +45,10 @@ export const COSEAlgToSigningAlg = {
 
 export const stringTimingSafeEqual = (a: string, b: string): boolean => {
     // @ts-ignore
-    return crypto.timingSafeEqual(byteStringToBuffer(a), byteStringToBuffer(b));
+    return crypto.subtle.timingSafeEqual(
+        byteStringToBuffer(a),
+        byteStringToBuffer(b)
+    );
 };
 
 export class Crypto {
