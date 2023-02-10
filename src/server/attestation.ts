@@ -1,6 +1,6 @@
 import { stringTimingSafeEqual } from '../crypto';
 import { unmarshal } from '../utils';
-import { WebAuthnOrigin, WebAuthnType } from './constants';
+import { Origin, WebAuthnType } from './constants';
 import { Context } from './context';
 import * as response from './response';
 import * as schema from './schema';
@@ -31,7 +31,7 @@ export class Attestation {
                 throw new Error('Wrong credential type');
             }
 
-            if (origin !== WebAuthnOrigin) {
+            if (origin !== Origin) {
                 throw new Error('Key generated from wrong origin');
             }
 
