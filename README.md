@@ -13,9 +13,9 @@ It still needs input validation on everything, however it is at least a somewhat
 
 ## Passkeys Flows
 
-Any user can have any username they want in this passkeys demo. The client browser generates the user id that will belong to that username, and that user id (which is a uuid v4), is the only piece of information that's stored about the user, along with their public key, and optional attestation data.
+Any user can have any username they want in this passkeys demo. The client browser generates the user id that will belong to that username, and that user id (which is an uuid v4) is the only piece of information that's stored about the user, along with their public key, and optional attestation data.
 
-Since there's no identifiable user information, this can be considered an anonymous passkey implementation.
+Since there's no identifiable user information, this can be considered an anonymous passkey implementation. As such, you'd be missing a way of keeping in touch with your users were you to implement the same demo.
 
 ### Attestation
 
