@@ -7,8 +7,8 @@ import {
 } from '../crypto';
 import {
     concatBuffer,
-    isBiggerBuffer,
     isEqualBuffer,
+    isValidSignCounter,
     safeByteEncode,
     unmarshal,
 } from '../utils';
@@ -120,7 +120,7 @@ export class Assertion {
             // Ensure the signing counter has been incremented
             if (
                 stored?.signCounter &&
-                !isBiggerBuffer(signCounter, stored?.signCounter)
+                !isValidSignCounter(stored?.signCounter, signCounter)
             ) {
                 throw new Error('Signing counter value invalid');
             }

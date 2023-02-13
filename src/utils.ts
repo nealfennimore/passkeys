@@ -69,6 +69,17 @@ export function isEqualBuffer(a: ArrayBuffer, b: ArrayBuffer) {
     return true;
 }
 
+export const PasskeySignCounter = new Uint8Array([0, 0, 0, 0]).buffer;
+export function isValidSignCounter(current: ArrayBuffer, next: ArrayBuffer) {
+    if (
+        isEqualBuffer(current, PasskeySignCounter) &&
+        isEqualBuffer(next, PasskeySignCounter)
+    ) {
+        return true;
+    }
+    return isBiggerBuffer(next, current);
+}
+
 const UUID_V4_REGEX =
     /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
