@@ -12,7 +12,7 @@ import {
     safeByteEncode,
     unmarshal,
 } from '../utils';
-import { Origin, OriginSHA256Hash, WebAuthnType } from './constants';
+import { HostDigest, Origin, WebAuthnType } from './constants';
 import { Context } from './context';
 import { StoredCredential } from './db';
 import * as response from './response';
@@ -82,7 +82,7 @@ export class Assertion {
 
             if (
                 origin !== Origin ||
-                !isEqualBuffer(rpIdHash, await OriginSHA256Hash)
+                !isEqualBuffer(rpIdHash, await HostDigest)
             ) {
                 throw new Error('Key generated from wrong origin');
             }
