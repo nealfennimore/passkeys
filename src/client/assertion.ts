@@ -9,20 +9,20 @@ export async function assertion(abortController: AbortController) {
         timeout: 60_000,
     };
 
-    const mediation =
-        /*
-         * Optional fills the need in most cases, but we can use conditional if wanted
-         * https://w3c.github.io/webappsec-credential-management/#dom-credentialmediationrequirement-conditional
-         */
-        // @ts-ignore
-        (await PublicKeyCredential?.isConditionalMediationAvailable?.())
-            ? 'conditional'
-            : 'optional';
+    // const mediation =
+    //     /*
+    //      * Optional fills the need in most cases, but we can use conditional if wanted
+    //      * https://w3c.github.io/webappsec-credential-management/#dom-credentialmediationrequirement-conditional
+    //      */
+    //     // @ts-ignore
+    //     (await PublicKeyCredential?.isConditionalMediationAvailable?.())
+    //         ? 'conditional'
+    //         : 'optional';
 
     const credential = (await window.navigator.credentials.get({
         publicKey,
         signal: abortController.signal,
-        mediation: mediation as CredentialMediationRequirement,
+        mediation: 'optional',
     })) as PublicKeyCredential;
     return await api.Assertion.verify(credential);
 }
