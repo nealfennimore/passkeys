@@ -7,14 +7,15 @@ import * as schema from './schema';
 
 export class Attestation {
     static async generate(ctx: Context) {
+        const body = await ctx?.request?.body();
         await ctx.cache.setCurrentUserIdForSession(
             ctx.cache.sessionId,
-            ctx?.body?.userId
+            body?.userId
         );
         const challenge = ctx.generateChallenge();
         await ctx.cache.setChallengeForSession(WebAuthnType.Create, challenge);
 
-        return response.json({ challenge }, ctx.headers);
+        return response.json({ challenge }, ctx.response.headers);
     }
 
     static async storeCredential(

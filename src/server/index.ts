@@ -39,7 +39,6 @@ router.options('*', function handleOptions(request) {
 router.post(
     '/attestation/generate',
     m.withContext,
-    m.setRequestBody,
     m.hasValidUserId,
     m.userDoesNotAlreadyExist,
     m.maybeSetSession,

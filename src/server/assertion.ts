@@ -60,7 +60,7 @@ export class Assertion {
         const challenge = await ctx.generateChallenge();
         await ctx.cache.setChallengeForSession(WebAuthnType.Get, challenge);
 
-        return response.json({ challenge }, ctx.headers);
+        return response.json({ challenge }, ctx.response.headers);
     }
 
     static async verifyCredential(

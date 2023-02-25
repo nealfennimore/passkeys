@@ -10,15 +10,10 @@ export const withContext = (request: IRequest, env: Env) => {
     request.ctx = ctx;
 };
 
-export const setRequestBody = async (request: IRequest, env: Env) => {
-    const ctx: Context = request.ctx;
-    const body = (await request.json()) as any;
-    ctx.body = body;
-};
-
 export const hasValidUserId = async (request: IRequest, env: Env) => {
     const ctx: Context = request.ctx;
-    if (!(ctx?.body?.userId && isUUIDv4(ctx?.body?.userId))) {
+    const body = await ctx.request.body();
+    if (!isUUIDv4(body?.userId)) {
         return response.json(
             { error: 'Invalid user ID. Must be UUID v4' },
             undefined,
@@ -28,7 +23,8 @@ export const hasValidUserId = async (request: IRequest, env: Env) => {
 };
 export const userDoesNotAlreadyExist = async (request: IRequest, env: Env) => {
     const ctx: Context = request.ctx;
-    if (await ctx?.db.hasUser(ctx?.body?.userId)) {
+    const body = await ctx.request.body();
+    if (await ctx?.db.hasUser(body?.userId)) {
         return response.json({ error: 'User already exists' }, undefined, 400);
     }
 };
@@ -38,7 +34,7 @@ export const maybeSetSession = async (request: IRequest, env: Env) => {
     const ctx: Context = request.ctx;
     const sessionId = ctx.cache.sessionId;
     if (!ctx.cache.hasSession) {
-        ctx.headers = {
+        ctx.response.headers = {
             'Set-Cookie': `session_id=${sessionId}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=Strict; Secure;`,
         };
     }
