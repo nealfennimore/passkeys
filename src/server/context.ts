@@ -5,14 +5,18 @@ import { DB } from './db';
 import { Env } from './env';
 
 class ContextRequest {
-    private _body: Promise<any>;
+    private _request: Request;
+    private _body: Record<string, any> | undefined;
 
     constructor(request: Request) {
-        this._body = request.json();
+        this._request = request;
     }
 
     async body() {
-        return await this._body;
+        if (!this._request.bodyUsed) {
+            this._body = await this._request.json();
+        }
+        return this._body;
     }
 }
 class ContextResponse {
