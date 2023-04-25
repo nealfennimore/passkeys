@@ -113,7 +113,8 @@ export class Assertion {
             }
 
             const signCounter = authenticatorData.slice(33, 37);
-            // Ensure the signing counter has been incremented
+            // Ensure the signing counter has been incremented for WebAuthn flows
+            // Passkeys sign counters are always '0000'
             if (
                 stored?.signCounter &&
                 !isValidSignCounter(stored?.signCounter, signCounter)
