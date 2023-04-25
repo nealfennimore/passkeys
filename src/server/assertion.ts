@@ -107,10 +107,6 @@ export class Assertion {
                 throw new Error('Credential not found');
             }
 
-            if (!userId) {
-                throw new Error('User not found');
-            }
-
             const isVerified = await Assertion.verify(stored, payload);
             if (!isVerified) {
                 throw new Error('Invalid signature');
