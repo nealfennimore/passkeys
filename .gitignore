@@ -4,3 +4,4 @@ shell.nix
 .direnv
 /build
 src/client/assets/app.css
+coverage
