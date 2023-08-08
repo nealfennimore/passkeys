@@ -55,7 +55,17 @@ export function fromAsn1DERtoRSSignature(
     signature: ArrayBuffer,
     hashBitLength: number
 ) {
+    if (hashBitLength % 8 !== 0) {
+        throw new Error(
+            `hashBitLength ${hashBitLength} is not a multiple of 8`
+        );
+    }
+
     const sig = new Uint8Array(signature);
+
+    if (sig[0] != 48) {
+        throw new Error('Invalid ASN.1 DER signature');
+    }
 
     const rStart = 4;
     const rLength = sig[3];
@@ -64,12 +74,6 @@ export function fromAsn1DERtoRSSignature(
 
     const r = sig.slice(rStart, rStart + rLength);
     const s = sig.slice(sStart, sStart + sLength);
-
-    if (hashBitLength % 8 !== 0) {
-        throw new Error(
-            `hashBitLength ${hashBitLength} is not a multiple of 8`
-        );
-    }
 
     const padding = hashBitLength / 8;
 

@@ -29,8 +29,8 @@ export const safeByteDecode = (data: ArrayBuffer) =>
     toBase64Url(bufferToByteString(data));
 
 export function concatBuffer(...buffers: ArrayBuffer[]) {
-    let length = buffers.reduce((a, b) => a + b.byteLength, 0);
-    let tmp = new Uint8Array(length);
+    const length = buffers.reduce((acc, b) => acc + b.byteLength, 0);
+    const tmp = new Uint8Array(length);
 
     let prev = 0;
     for (let buffer of buffers) {
