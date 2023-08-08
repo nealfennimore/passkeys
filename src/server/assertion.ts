@@ -36,7 +36,7 @@ export class Assertion {
         const authenticatorData = safeByteEncode(payload.authenticatorData);
         const clientDataJSON = safeByteEncode(payload.clientDataJSON);
 
-        // Convert from DER ASN.1 encoding to Raw ECDSA signature
+        // Convert from DER ASN.1 encoding to r|s ECDSA signature
         const offset = new Uint8Array(signature)[4] === 0 ? 1 : 0;
         const rawSig = concatBuffer(
             signature.slice(4 + offset, 36 + offset),

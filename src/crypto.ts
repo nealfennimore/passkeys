@@ -1,4 +1,4 @@
-import { byteStringToBuffer } from './utils';
+import { byteStringToBuffer, concatBuffer } from './utils';
 
 export enum Digests {
     SHA256 = 'SHA-256',
@@ -50,6 +50,45 @@ export const stringTimingSafeEqual = (a: string, b: string): boolean => {
         byteStringToBuffer(b)
     );
 };
+
+export function fromAsn1DERtoRSSignature(
+    signature: ArrayBuffer,
+    hashBitLength: number
+) {
+    const sig = new Uint8Array(signature);
+
+    const rStart = 4;
+    const rLength = sig[3];
+    const sStart = rStart + rLength + 2;
+    const sLength = sig[rStart + rLength + 1];
+
+    const r = sig.slice(rStart, rStart + rLength);
+    const s = sig.slice(sStart, sStart + sLength);
+
+    if (hashBitLength % 8 !== 0) {
+        throw new Error(
+            `hashBitLength ${hashBitLength} is not a multiple of 8`
+        );
+    }
+
+    const padding = hashBitLength / 8;
+
+    if (r.length > padding || s.length > padding) {
+        throw new Error(
+            `Invalid r or s value bigger than allowed max size of ${padding}`
+        );
+    }
+
+    const rPadding = padding - r.length;
+    const sPadding = padding - s.length;
+
+    return concatBuffer(
+        new Uint8Array(rPadding).fill(0),
+        r,
+        new Uint8Array(sPadding).fill(0),
+        s
+    );
+}
 
 export class Crypto {
     static async toCryptoKey(
