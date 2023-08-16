@@ -1,12 +1,11 @@
-import { Crypto } from '@peculiar/webcrypto';
 import * as x509 from '@peculiar/x509';
 import { fromAsn1DERtoRSSignature } from '../../crypto';
 import { cborDecode, concatBuffer, decode, toBase64Url } from '../../utils';
 
 describe('Attestation', () => {
     test('attested data for yubikey', async () => {
-        const crypto = new Crypto();
-        x509.cryptoProvider.set(crypto);
+        const crypto = await import('node:crypto');
+        x509.cryptoProvider.set(crypto as Crypto);
 
         const challenge = 'eHlZ77-977-977-9de-_vWRZZ3_vv71J77-9EQ';
 
