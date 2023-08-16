@@ -19,15 +19,9 @@ function getPublicKey(
     if (attestation?.getPublicKey) {
         return attestation.getPublicKey() as ArrayBuffer;
     }
-
-    const { authData }: { authData: Uint8Array } = cborDecode(
-        new Uint8Array(attestation.attestationObject)
+    throw new Error(
+        'No getPublicKey available. Please change to supported browser'
     );
-    const attestedCredentialData = authData.slice(37);
-    const credentialIdLength: number = new DataView(
-        attestedCredentialData.slice(16, 18).buffer
-    ).getUint16(0);
-    return attestedCredentialData.slice(18 + credentialIdLength).buffer;
 }
 function getPublicKeyAlgorithm(
     attestation: AuthenticatorAttestationResponse
@@ -35,10 +29,9 @@ function getPublicKeyAlgorithm(
     if (attestation?.getPublicKeyAlgorithm) {
         return attestation.getPublicKeyAlgorithm();
     }
-
-    const pubkey = getPublicKey(attestation);
-    const decodedPubkey = cborDecode(new Uint8Array(pubkey));
-    return decodedPubkey[3];
+    throw new Error(
+        'No getPublicKeyAlgorithm available. Please change to supported browser'
+    );
 }
 
 export namespace Attestation {
@@ -50,27 +43,37 @@ export namespace Attestation {
     }
 
     export async function store(credential: PublicKeyCredential) {
-        const attestation =
-            credential.response as AuthenticatorAttestationResponse;
+        try {
+            const attestation =
+                credential.response as AuthenticatorAttestationResponse;
 
-        // DEBUG:
-        console.log(JSON.parse(decode(attestation.clientDataJSON)));
-        // DEBUG:
-        console.log(cborDecode(new Uint8Array(attestation.attestationObject)));
-        // DEBUG:
-        // @ts-ignore
-        window.attestation = credential;
+            // DEBUG:
+            console.log(JSON.parse(decode(attestation.clientDataJSON)));
+            // DEBUG:
+            console.log(
+                cborDecode(new Uint8Array(attestation.attestationObject))
+            );
+            // DEBUG:
+            // @ts-ignore
+            window.attestation = credential;
 
-        const payload: schema.Attestation.StoreCredentialPayload = {
-            kid: credential.id,
-            clientDataJSON: safeByteDecode(attestation.clientDataJSON),
-            attestationObject: safeByteDecode(attestation.attestationObject),
-            pubkey: safeByteDecode(getPublicKey(attestation)),
-            coseAlg: getPublicKeyAlgorithm(attestation),
-        };
+            const payload: schema.Attestation.StoreCredentialPayload = {
+                kid: credential.id,
+                clientDataJSON: safeByteDecode(attestation.clientDataJSON),
+                attestationObject: safeByteDecode(
+                    attestation.attestationObject
+                ),
+                pubkey: safeByteDecode(getPublicKey(attestation)),
+                coseAlg: getPublicKeyAlgorithm(attestation),
+            };
 
-        const response = await makeRequest('attestation/store', payload);
-        return (await response.json()) as schema.Attestation.StoreCredentialResponse;
+            const response = await makeRequest('attestation/store', payload);
+            return (await response.json()) as schema.Attestation.StoreCredentialResponse;
+        } catch (e: any) {
+            return {
+                error: e.message,
+            };
+        }
     }
 }
 
