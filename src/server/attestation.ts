@@ -42,9 +42,16 @@ export class Attestation {
                 clientDataJSON
             ) as schema.ClientDataJSON;
 
-            const { authData, attStmt } = cborDecode(
-                new Uint8Array(safeByteEncode(attestationObject))
-            );
+            const {
+                authData,
+                attStmt,
+            }: {
+                authData: Uint8Array;
+                attStmt: {
+                    x5c?: Uint8Array[];
+                    sig?: Uint8Array;
+                };
+            } = cborDecode(new Uint8Array(safeByteEncode(attestationObject)));
 
             if (attStmt.hasOwnProperty('ecdaaKeyId')) {
                 throw new Error('Not supporting ecdaaKeyId');
@@ -56,6 +63,12 @@ export class Attestation {
 
             // Support hardware tokens like yubikeys
             if (attStmt.hasOwnProperty('x5c')) {
+                if (!attStmt?.x5c?.length) {
+                    throw new Error('No x509 certs');
+                }
+                if (!attStmt?.sig) {
+                    throw new Error('No attestation signature');
+                }
                 const clientDataHash = await crypto.subtle.digest(
                     'SHA-256',
                     safeByteEncode(clientDataJSON)
