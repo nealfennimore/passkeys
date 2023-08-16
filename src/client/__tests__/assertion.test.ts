@@ -4,7 +4,7 @@ import { concatBuffer, decode } from '../../utils';
 
 describe('Assertion', () => {
     test('assertion data for yubikey', async () => {
-        const crypto = await import('node:crypto');
+        const crypto = (await import('node:crypto')).webcrypto;
         x509.cryptoProvider.set(crypto as Crypto);
 
         const challenge = 'DzTvv71gFHnvv70ITVDvv71777-9Txpx';
@@ -141,7 +141,7 @@ describe('Assertion', () => {
         ).toBeTruthy();
     });
     test('assertion data for Google passkey', async () => {
-        const crypto = await import('node:crypto');
+        const crypto = (await import('node:crypto')).webcrypto;
         x509.cryptoProvider.set(crypto as Crypto);
 
         const challenge = 'De-_vSMNLVjvv71m77-977-9Wu-_vQ3vv71W77-9';

@@ -4,7 +4,7 @@ import { cborDecode, concatBuffer, decode, toBase64Url } from '../../utils';
 
 describe('Attestation', () => {
     test('attested data for yubikey', async () => {
-        const crypto = await import('node:crypto');
+        const crypto = (await import('node:crypto')).webcrypto;
         x509.cryptoProvider.set(crypto as Crypto);
 
         const challenge = 'eHlZ77-977-977-9de-_vWRZZ3_vv71J77-9EQ';
@@ -219,7 +219,7 @@ describe('Attestation', () => {
         ).toBeTruthy();
     });
     test('attested data for Google passkey', async () => {
-        const crypto = await import('node:crypto');
+        const crypto = (await import('node:crypto')).webcrypto;
         x509.cryptoProvider.set(crypto as Crypto);
 
         const challenge = '77-9UBTvv73vv73vv73vv71W77-9Jkrvv70W77-9UxI';
