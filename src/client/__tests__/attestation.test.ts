@@ -1,10 +1,12 @@
-import { X509Certificate, createVerify } from 'crypto';
+import { Crypto } from '@peculiar/webcrypto';
+import * as x509 from '@peculiar/x509';
 import { fromAsn1DERtoRSSignature } from '../../crypto';
 import { cborDecode, concatBuffer, decode, toBase64Url } from '../../utils';
 
 describe('Attestation', () => {
     test('attested data for yubikey', async () => {
-        let crypto = await (await import('node:crypto')).webcrypto;
+        const crypto = new Crypto();
+        x509.cryptoProvider.set(crypto);
 
         const challenge = 'XDk8NCPvv70E77-977-9CO-_ve-_vUYQ77-977-9';
 
@@ -194,21 +196,8 @@ describe('Attestation', () => {
         expect(clientDataHash).toEqual(signatureBase.slice(authData.length));
 
         if (attStmt.hasOwnProperty('x5c')) {
-            const attestnCert = new X509Certificate(attStmt.x5c[0]);
-            const jwk = attestnCert.publicKey.export({ format: 'jwk' });
-            expect(
-                createVerify('sha256')
-                    .update(new Uint8Array(signatureBase))
-                    .verify(attestnCert.publicKey, attStmt.sig)
-            ).toBeTruthy();
-
-            const pubkey = await crypto.subtle.importKey(
-                'jwk',
-                jwk,
-                { name: 'ECDSA', namedCurve: 'P-256' },
-                true,
-                ['verify']
-            );
+            const cert = new x509.X509Certificate(attStmt.x5c[0]);
+            const pubkey = await cert.publicKey.export();
 
             let rsSig = fromAsn1DERtoRSSignature(attStmt.sig, 256);
 

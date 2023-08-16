@@ -204,6 +204,7 @@ const config: Config = {
     },
 
     moduleNameMapper: {
+        '(ipaddr.js)': '$1',
         '(.+)\\.js': '$1',
     },
 
