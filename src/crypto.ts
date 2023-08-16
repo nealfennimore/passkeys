@@ -43,6 +43,12 @@ export const COSEAlgToSigningAlg = {
     [COSEAlgorithm.ES512.toString()]: SigningAlg.ECDSA,
 };
 
+export const COSEAlgToDigestBits = {
+    [COSEAlgorithm.ES256.toString()]: 256,
+    [COSEAlgorithm.ES384.toString()]: 384,
+    [COSEAlgorithm.ES512.toString()]: 512,
+};
+
 export const stringTimingSafeEqual = (a: string, b: string): boolean => {
     // @ts-ignore
     return crypto.subtle.timingSafeEqual(
