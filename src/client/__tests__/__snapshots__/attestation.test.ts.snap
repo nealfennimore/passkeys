@@ -1000,6 +1000,14 @@ exports[`Attestation attested data for yubikey 1`] = `
 }
 `;
 
+exports[`Attestation attested data for yubikey 2`] = `
+{
+  "challenge": "eHlZ77-977-977-9de-_vWRZZ3_vv71J77-9EQ",
+  "origin": "https://passkeys.neal.codes",
+  "type": "webauthn.create",
+}
+`;
+
 exports[`Attestation attested data for yubikey: AAGUID 1`] = `"�(yrI�u=�Η*"`;
 
 exports[`Attestation attested data for yubikey: Counter 1`] = `

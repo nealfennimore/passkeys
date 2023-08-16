@@ -8,7 +8,7 @@ describe('Attestation', () => {
         const crypto = new Crypto();
         x509.cryptoProvider.set(crypto);
 
-        const challenge = 'XDk8NCPvv70E77-977-9CO-_ve-_vUYQ77-977-9';
+        const challenge = 'eHlZ77-977-977-9de-_vWRZZ3_vv71J77-9EQ';
 
         let rawId = new Uint8Array([
             65, 121, 225, 210, 211, 232, 136, 54, 134, 138, 127, 251, 184, 198,
@@ -118,6 +118,15 @@ describe('Attestation', () => {
         expect(decodedAttestationObject).toMatchSnapshot();
 
         /**
+         * Client Data JSON
+         */
+
+        const clientDataJSON = JSON.parse(decode(response.clientDataJSON));
+
+        expect(clientDataJSON).toMatchSnapshot();
+        expect(clientDataJSON.challenge).toEqual(challenge);
+
+        /**
          * Authenticator Data
          * https://www.w3.org/TR/webauthn/#sctn-attestation
          */
@@ -195,6 +204,8 @@ describe('Attestation', () => {
         );
         expect(clientDataHash).toEqual(signatureBase.slice(authData.length));
 
+        expect(attStmt).toHaveProperty('x5c');
+
         if (attStmt.hasOwnProperty('x5c')) {
             const cert = new x509.X509Certificate(attStmt.x5c[0]);
             const pubkey = await cert.publicKey.export();
@@ -232,7 +243,7 @@ describe('Attestation', () => {
                     { name: 'ECDSA', hash: 'SHA-256' },
                     pubkey,
                     rsSig,
-                    await crypto.subtle.digest('SHA-256', signatureBase)
+                    signatureBase
                 )
             ).toBeTruthy();
             expect(credentialPublicKey[3]).toEqual(attStmt.alg);
