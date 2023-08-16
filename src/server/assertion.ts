@@ -1,8 +1,10 @@
 import {
     COSEAlgToDigest,
+    COSEAlgToDigestBits,
     COSEAlgToSigningAlg,
     COSEAlgToSigningCurve,
     Crypto,
+    fromAsn1DERtoRSSignature,
     stringTimingSafeEqual,
 } from '../crypto';
 import {
@@ -36,11 +38,10 @@ export class Assertion {
         const authenticatorData = safeByteEncode(payload.authenticatorData);
         const clientDataJSON = safeByteEncode(payload.clientDataJSON);
 
-        // Convert from DER ASN.1 encoding to Raw ECDSA signature
-        const offset = new Uint8Array(signature)[4] === 0 ? 1 : 0;
-        const rawSig = concatBuffer(
-            signature.slice(4 + offset, 36 + offset),
-            signature.slice(-32)
+        // Convert from DER ASN.1 encoding to r|s ECDSA signature
+        const rawSig = fromAsn1DERtoRSSignature(
+            signature,
+            COSEAlgToDigestBits[coseAlg]
         );
 
         const digest = concatBuffer(

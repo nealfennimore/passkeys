@@ -13,6 +13,34 @@ const makeRequest = (endpoint: string, data: object = {}) =>
         })
     );
 
+function getPublicKey(
+    attestation: AuthenticatorAttestationResponse
+): ArrayBuffer {
+    if (attestation.hasOwnProperty('getPublicKey')) {
+        return attestation.getPublicKey() as ArrayBuffer;
+    }
+
+    const { authData }: { authData: Uint8Array } = cborDecode(
+        new Uint8Array(attestation.attestationObject)
+    );
+    const attestedCredentialData = authData.slice(37);
+    const credentialIdLength: number = new DataView(
+        attestedCredentialData.slice(16, 18).buffer
+    ).getUint16(0);
+    return attestedCredentialData.slice(18 + credentialIdLength).buffer;
+}
+function getPublicKeyAlgorithm(
+    attestation: AuthenticatorAttestationResponse
+): number {
+    if (attestation.hasOwnProperty('getPublicKeyAlgorithm')) {
+        return attestation.getPublicKeyAlgorithm();
+    }
+
+    const pubkey = getPublicKey(attestation);
+    const decodedPubkey = cborDecode(new Uint8Array(pubkey));
+    return decodedPubkey[3];
+}
+
 export namespace Attestation {
     export async function generate(userId: string) {
         const response = await makeRequest('attestation/generate', {
@@ -37,8 +65,8 @@ export namespace Attestation {
             kid: credential.id,
             clientDataJSON: safeByteDecode(attestation.clientDataJSON),
             attestationObject: safeByteDecode(attestation.attestationObject),
-            pubkey: safeByteDecode(attestation.getPublicKey() as ArrayBuffer),
-            coseAlg: attestation.getPublicKeyAlgorithm(),
+            pubkey: safeByteDecode(getPublicKey(attestation)),
+            coseAlg: getPublicKeyAlgorithm(attestation),
         };
 
         const response = await makeRequest('attestation/store', payload);

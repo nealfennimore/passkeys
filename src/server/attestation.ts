@@ -1,9 +1,23 @@
-import { stringTimingSafeEqual } from '../crypto';
-import { unmarshal } from '../utils';
-import { Origin, WebAuthnType } from './constants';
+import * as x509 from '@peculiar/x509';
+import {
+    COSEAlgToDigest,
+    COSEAlgToDigestBits,
+    fromAsn1DERtoRSSignature,
+    stringTimingSafeEqual,
+} from '../crypto';
+import {
+    cborDecode,
+    concatBuffer,
+    isEqualBuffer,
+    safeByteEncode,
+    unmarshal,
+} from '../utils';
+import { HostDigest, Origin, WebAuthnType } from './constants';
 import { Context } from './context';
 import * as response from './response';
 import * as schema from './schema';
+
+x509.cryptoProvider.set(crypto as Crypto);
 
 export class Attestation {
     static async generate(ctx: Context) {
@@ -23,16 +37,53 @@ export class Attestation {
         payload: schema.Attestation.StoreCredentialPayload
     ) {
         try {
-            const { clientDataJSON, kid } = payload;
+            const { clientDataJSON, attestationObject, kid, coseAlg } = payload;
             const { challenge, type, origin } = unmarshal(
                 clientDataJSON
             ) as schema.ClientDataJSON;
+
+            const { authData, attStmt } = cborDecode(
+                new Uint8Array(safeByteEncode(attestationObject))
+            );
+
+            if (attStmt.hasOwnProperty('ecdaaKeyId')) {
+                throw new Error('Not supporting ecdaaKeyId');
+            }
 
             if (type !== WebAuthnType.Create) {
                 throw new Error('Wrong credential type');
             }
 
-            if (origin !== Origin) {
+            // Support hardware tokens like yubikeys
+            if (attStmt.hasOwnProperty('x5c')) {
+                const clientDataHash = await crypto.subtle.digest(
+                    'SHA-256',
+                    safeByteEncode(clientDataJSON)
+                );
+                const cert = new x509.X509Certificate(attStmt.x5c[0]);
+                const pubkey = await cert.publicKey.export();
+                const signatureBase = concatBuffer(authData, clientDataHash);
+
+                if (
+                    !(await crypto.subtle.verify(
+                        { name: 'ECDSA', hash: COSEAlgToDigest[coseAlg] },
+                        pubkey,
+                        fromAsn1DERtoRSSignature(
+                            attStmt.sig,
+                            COSEAlgToDigestBits[coseAlg]
+                        ),
+                        signatureBase
+                    ))
+                ) {
+                    throw new Error('Invalid x5c signature');
+                }
+            }
+
+            const rpIdHash = authData.slice(0, 32);
+            if (
+                origin !== Origin ||
+                !isEqualBuffer(rpIdHash, await HostDigest)
+            ) {
                 throw new Error('Key generated from wrong origin');
             }
 

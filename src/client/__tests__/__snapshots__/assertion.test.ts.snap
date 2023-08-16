@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Assertion assertion data for Google passkey 1`] = `
+{
+  "androidPackageName": "com.brave.browser",
+  "challenge": "De-_vSMNLVjvv71m77-977-9Wu-_vQ3vv71W77-9",
+  "origin": "https://passkeys.neal.codes",
+  "type": "webauthn.get",
+}
+`;
+
+exports[`Assertion assertion data for Google passkey: Flags 1`] = `29`;
+
+exports[`Assertion assertion data for Google passkey: RP ID hash 1`] = `
+Uint8Array [
+  250,
+  247,
+  248,
+  112,
+  184,
+  53,
+  44,
+  237,
+  158,
+  79,
+  227,
+  193,
+  219,
+  31,
+  225,
+  187,
+  249,
+  254,
+  83,
+  239,
+  87,
+  77,
+  45,
+  67,
+  242,
+  189,
+  97,
+  31,
+  96,
+  116,
+  166,
+  113,
+]
+`;
+
+exports[`Assertion assertion data for Google passkey: Sign Counter 1`] = `
+Uint8Array [
+  0,
+  0,
+  0,
+  0,
+]
+`;
+
+exports[`Assertion assertion data for yubikey 1`] = `
+{
+  "challenge": "DzTvv71gFHnvv70ITVDvv71777-9Txpx",
+  "crossOrigin": false,
+  "origin": "https://passkeys.neal.codes",
+  "type": "webauthn.get",
+}
+`;
+
+exports[`Assertion assertion data for yubikey: Flags 1`] = `5`;
+
+exports[`Assertion assertion data for yubikey: RP ID hash 1`] = `
+Uint8Array [
+  250,
+  247,
+  248,
+  112,
+  184,
+  53,
+  44,
+  237,
+  158,
+  79,
+  227,
+  193,
+  219,
+  31,
+  225,
+  187,
+  249,
+  254,
+  83,
+  239,
+  87,
+  77,
+  45,
+  67,
+  242,
+  189,
+  97,
+  31,
+  96,
+  116,
+  166,
+  113,
+]
+`;
+
+exports[`Assertion assertion data for yubikey: Sign Counter 1`] = `
+Uint8Array [
+  0,
+  0,
+  0,
+  20,
+]
+`;
