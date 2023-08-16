@@ -72,8 +72,22 @@ export function fromAsn1DERtoRSSignature(
     const sStart = rStart + rLength + 2;
     const sLength = sig[rStart + rLength + 1];
 
-    const r = sig.slice(rStart, rStart + rLength);
-    const s = sig.slice(sStart, sStart + sLength);
+    let r = sig.slice(rStart, rStart + rLength);
+    let s = sig.slice(sStart, sStart + sLength);
+
+    // Remove any 0 padding
+    for (let i of r.slice()) {
+        if (i !== 0) {
+            break;
+        }
+        r = r.slice(1);
+    }
+    for (let i of s.slice()) {
+        if (i !== 0) {
+            break;
+        }
+        s = s.slice(1);
+    }
 
     const padding = hashBitLength / 8;
 
