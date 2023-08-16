@@ -79,7 +79,7 @@ export class Attestation {
                 }
             }
 
-            const rpIdHash = authData.slice(0, 32);
+            const rpIdHash = authData.slice(0, 32).buffer;
             if (
                 origin !== Origin ||
                 !isEqualBuffer(rpIdHash, await HostDigest)
