@@ -16,7 +16,7 @@ const makeRequest = (endpoint: string, data: object = {}) =>
 function getPublicKey(
     attestation: AuthenticatorAttestationResponse
 ): ArrayBuffer {
-    if (attestation.hasOwnProperty('getPublicKey')) {
+    if (attestation?.getPublicKey) {
         return attestation.getPublicKey() as ArrayBuffer;
     }
 
@@ -32,7 +32,7 @@ function getPublicKey(
 function getPublicKeyAlgorithm(
     attestation: AuthenticatorAttestationResponse
 ): number {
-    if (attestation.hasOwnProperty('getPublicKeyAlgorithm')) {
+    if (attestation?.getPublicKeyAlgorithm) {
         return attestation.getPublicKeyAlgorithm();
     }
 
