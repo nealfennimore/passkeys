@@ -122,7 +122,7 @@ describe('Attestation', () => {
 
         const clientDataJSON = JSON.parse(decode(response.clientDataJSON));
 
-        expect(clientDataJSON).toMatchSnapshot();
+        expect(clientDataJSON).toMatchSnapshot('clientDataJSON');
         expect(clientDataJSON.challenge).toEqual(challenge);
 
         /**
@@ -281,7 +281,7 @@ describe('Attestation', () => {
 
         const clientDataJSON = JSON.parse(decode(response.clientDataJSON));
 
-        expect(clientDataJSON).toMatchSnapshot();
+        expect(clientDataJSON).toMatchSnapshot('clientDataJSON');
         expect(clientDataJSON.challenge).toEqual(challenge);
 
         /**
