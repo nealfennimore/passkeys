@@ -12,7 +12,7 @@ import {
     cborDecode,
     concatBuffer,
     isEqualBuffer,
-    safeByteEncode,
+    safeByteDecode,
     unmarshal,
 } from '../utils';
 import { HostDigest, Origin, WebAuthnType } from './constants';
@@ -54,14 +54,14 @@ async function validatePacked(
         pubkey = await cert.publicKey.export();
     } else {
         pubkey = await _Crypto.toCryptoKey(
-            safeByteEncode(payload.pubkey),
+            safeByteDecode(payload.pubkey),
             COSEAlgToSigningAlg[payload.coseAlg],
             COSEAlgToSigningCurve[payload.coseAlg]
         );
     }
     const clientDataHash = await crypto.subtle.digest(
         'SHA-256',
-        safeByteEncode(payload.clientDataJSON)
+        safeByteDecode(payload.clientDataJSON)
     );
     const signatureBase = concatBuffer(authData, clientDataHash);
     const isVerified = await crypto.subtle.verify(
@@ -107,7 +107,7 @@ export class Attestation {
             }
 
             const { fmt, authData, attStmt }: DecodedAttestationObject =
-                cborDecode(new Uint8Array(safeByteEncode(attestationObject)));
+                cborDecode(new Uint8Array(safeByteDecode(attestationObject)));
 
             switch (fmt) {
                 case 'none':

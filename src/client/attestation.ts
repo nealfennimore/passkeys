@@ -1,5 +1,5 @@
 import { COSEAlgorithm } from '../crypto.js';
-import { encode, safeEncode } from '../utils.js';
+import { encode, safeDecode } from '../utils.js';
 import * as api from './api.js';
 
 export async function attestation(
@@ -9,7 +9,7 @@ export async function attestation(
     const userId = crypto.randomUUID();
     const { challenge } = await api.Attestation.generate(userId);
     const publicKey: PublicKeyCredentialCreationOptions = {
-        challenge: safeEncode(challenge),
+        challenge: safeDecode(challenge),
         rp: {
             id: window.location.host,
             name: document.title,

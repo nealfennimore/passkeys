@@ -1,5 +1,5 @@
 import * as schema from '../server/schema.js';
-import { cborDecode, decode, safeByteDecode } from '../utils.js';
+import { cborDecode, decode, safeByteEncode } from '../utils.js';
 
 const makeRequest = (endpoint: string, data: object = {}) =>
     fetch(
@@ -59,11 +59,11 @@ export namespace Attestation {
 
             const payload: schema.Attestation.StoreCredentialPayload = {
                 kid: credential.id,
-                clientDataJSON: safeByteDecode(attestation.clientDataJSON),
-                attestationObject: safeByteDecode(
+                clientDataJSON: safeByteEncode(attestation.clientDataJSON),
+                attestationObject: safeByteEncode(
                     attestation.attestationObject
                 ),
-                pubkey: safeByteDecode(getPublicKey(attestation)),
+                pubkey: safeByteEncode(getPublicKey(attestation)),
                 coseAlg: getPublicKeyAlgorithm(attestation),
             };
 
@@ -99,9 +99,9 @@ export namespace Assertion {
 
         const payload: schema.Assertion.VerifyPayload = {
             kid: credential.id,
-            clientDataJSON: safeByteDecode(assertion.clientDataJSON),
-            authenticatorData: safeByteDecode(assertion.authenticatorData),
-            signature: safeByteDecode(assertion.signature),
+            clientDataJSON: safeByteEncode(assertion.clientDataJSON),
+            authenticatorData: safeByteEncode(assertion.authenticatorData),
+            signature: safeByteEncode(assertion.signature),
         };
         const response = await makeRequest('assertion/verify', payload);
         return (await response.json()) as schema.Assertion.VerifyResponse;
