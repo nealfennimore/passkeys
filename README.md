@@ -1,8 +1,8 @@
 # Passkeys Demo
 
-:warning: **This passkeys demo is not secure.** :warning:
-
-It still needs input validation on everything, however it is at least a somewhat reasonable way of architecting and storing passkeys.
+> [!WARNING]
+> **This passkeys demo is not secure.**
+> It still needs input validation on everything, however it is at least a somewhat reasonable way of architecting and storing passkeys.
 
 ## Architecture
 
