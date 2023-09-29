@@ -115,6 +115,7 @@ export class Attestation {
                     break;
                 case 'packed':
                     await validatePacked(attStmt, authData, payload);
+                    break;
                 default:
                     throw new Error(`Unsupported attestation format: ${fmt}`);
             }
