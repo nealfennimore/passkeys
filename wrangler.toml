@@ -8,11 +8,9 @@ kv_namespaces = [
     { binding = "challenges", id = "fcf01b2762c84b2db20630ef1ba561f2" },
 ]
 
-routes = [
-    { pattern = "api.passkeys.neal.codes", custom_domain = true },
-]
+routes = [{ pattern = "api.passkeys.neal.codes", custom_domain = true }]
 
 [[ d1_databases ]]
 binding = "DB"
-database_name = "passkeys_db"
-database_id = "03c57541-d2cb-4c00-a172-5f65196f37f5"
+database_name = "passkeys_db_1"
+database_id = "210493a3-e456-4db2-bbf7-c877e642f9db"
