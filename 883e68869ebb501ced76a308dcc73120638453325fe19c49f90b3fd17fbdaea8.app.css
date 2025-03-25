@@ -679,6 +679,10 @@ select {
   --tw-backdrop-sepia:  ;
 }
 
+.static {
+  position: static;
+}
+
 .block {
   display: block;
 }
