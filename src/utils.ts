@@ -10,7 +10,7 @@ const decoder = new TextDecoder();
 export const encode = encoder.encode.bind(encoder);
 export const decode = decoder.decode.bind(decoder);
 
-export const byteStringToBuffer = (byteString: string) =>
+export const byteStringToBuffer = (byteString: string): ArrayBuffer =>
     Uint8Array.from(byteString, (e) => e.charCodeAt(0)).buffer;
 
 export const bufferToByteString = (buffer: ArrayBuffer) =>
@@ -25,7 +25,7 @@ export const safeEncode = (data: string): Uint8Array =>
     encode(fromBase64Url(data));
 export const safeDecode = (data: ArrayBuffer): string =>
     toBase64Url(decode(data));
-export const safeByteEncode = (data: string): ArrayBufferLike =>
+export const safeByteEncode = (data: string): ArrayBuffer =>
     byteStringToBuffer(fromBase64Url(data));
 export const safeByteDecode = (data: ArrayBuffer): string =>
     toBase64Url(bufferToByteString(data));
