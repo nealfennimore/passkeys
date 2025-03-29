@@ -1,5 +1,5 @@
 import { Request } from '@cloudflare/workers-types';
-import { safeEncode } from '../utils.js';
+import { safeDecode } from '../utils.js';
 import { Cache } from './cache';
 import { DB } from './db';
 import { Env } from './env';
@@ -45,6 +45,6 @@ export class Context {
         this.response = new ContextResponse();
     }
     generateChallenge() {
-        return safeEncode(crypto.getRandomValues(new Uint8Array(16)));
+        return safeDecode(crypto.getRandomValues(new Uint8Array(16)));
     }
 }

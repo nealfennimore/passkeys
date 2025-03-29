@@ -11,7 +11,7 @@ import {
     concatBuffer,
     isEqualBuffer,
     isValidSignCounter,
-    safeByteDecode,
+    safeByteEncode,
     unmarshal,
 } from '../utils';
 import { HostDigest, Origin, WebAuthnType } from './constants';
@@ -34,9 +34,9 @@ export class Assertion {
         );
         const digestAlg = COSEAlgToDigest[coseAlg];
 
-        const signature = safeByteDecode(payload.signature);
-        const authenticatorData = safeByteDecode(payload.authenticatorData);
-        const clientDataJSON = safeByteDecode(payload.clientDataJSON);
+        const signature = safeByteEncode(payload.signature);
+        const authenticatorData = safeByteEncode(payload.authenticatorData);
+        const clientDataJSON = safeByteEncode(payload.clientDataJSON);
 
         // Convert from DER ASN.1 encoding to r|s ECDSA signature
         const rawSig = fromAsn1DERtoRSSignature(
@@ -74,7 +74,7 @@ export class Assertion {
                 clientDataJSON
             ) as schema.ClientDataJSON;
 
-            const authenticatorData = safeByteDecode(payload.authenticatorData);
+            const authenticatorData = safeByteEncode(payload.authenticatorData);
             const rpIdHash = authenticatorData.slice(0, 32);
 
             if (type !== WebAuthnType.Get) {

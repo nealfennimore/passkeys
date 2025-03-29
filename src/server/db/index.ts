@@ -1,4 +1,4 @@
-import { safeByteDecode } from '../../utils';
+import { safeByteEncode } from '../../utils';
 import { Env } from '../env';
 import * as schema from '../schema';
 
@@ -57,8 +57,8 @@ export class DB {
             'INSERT INTO public_keys(kid, pubkey, attestation_data, cose_alg, user_id) VALUES(?1, ?2, ?3, ?4, ?5)'
         ).bind(
             kid,
-            safeByteDecode(pubkey),
-            safeByteDecode(attestationObject),
+            safeByteEncode(pubkey),
+            safeByteEncode(attestationObject),
             coseAlg,
             userId
         );

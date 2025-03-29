@@ -1,10 +1,10 @@
-import { safeDecode } from '../utils.js';
+import { safeEncode } from '../utils.js';
 import * as api from './api.js';
 
 export async function assertion(abortController: AbortController) {
     const { challenge } = await api.Assertion.generate();
     const publicKey: PublicKeyCredentialRequestOptions = {
-        challenge: safeDecode(challenge),
+        challenge: safeEncode(challenge),
         rpId: window.location.host,
         timeout: 60_000,
     };

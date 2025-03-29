@@ -21,11 +21,13 @@ export const fromBase64Url = _fromBase64Url;
 export const marshal = (data: object) => toBase64Url(JSON.stringify(data));
 export const unmarshal = (data: string) => JSON.parse(fromBase64Url(data));
 
-export const safeDecode = (data: string): Uint8Array => encode(fromBase64Url(data));
-export const safeEncode = (data: ArrayBuffer): string => toBase64Url(decode(data));
-export const safeByteDecode = (data: string): ArrayBufferLike =>
+export const safeEncode = (data: string): Uint8Array =>
+    encode(fromBase64Url(data));
+export const safeDecode = (data: ArrayBuffer): string =>
+    toBase64Url(decode(data));
+export const safeByteEncode = (data: string): ArrayBufferLike =>
     byteStringToBuffer(fromBase64Url(data));
-export const safeByteEncode = (data: ArrayBuffer): string =>
+export const safeByteDecode = (data: ArrayBuffer): string =>
     toBase64Url(bufferToByteString(data));
 
 export function concatBuffer(...buffers: ArrayBuffer[]) {
