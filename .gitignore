@@ -1,8 +1,8 @@
 node_modules
 shell.nix
-.envrc
 .direnv
 /build
 src/client/assets/app.css
 coverage
 .direnv
+.wrangler

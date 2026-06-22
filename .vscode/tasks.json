@@ -1,0 +1,79 @@
+{
+    // Run these with: Terminal > Run Task… (or Run Build Task / Cmd+Shift+B for "Dev: All").
+    // Every command is wrapped in `nix develop --command` so Node from the flake's
+    // devShell is on PATH even if the terminal isn't already inside the dev shell.
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Dev: All",
+            "detail": "Run the API, client, and type-checker together",
+            "dependsOn": [
+                "Dev: API (wrangler)",
+                "Dev: Client (assets + css watch)",
+                "Dev: Typecheck (tsc --watch)"
+            ],
+            "dependsOrder": "parallel",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Dev: API (wrangler)",
+            "detail": "wrangler dev — serves the Cloudflare Worker API",
+            "type": "shell",
+            "command": "nix develop --command npm start",
+            "isBackground": true,
+            "presentation": {
+                "group": "dev",
+                "panel": "dedicated",
+                "reveal": "always",
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Dev: Client (assets + css watch)",
+            "detail": "Static asset server + Tailwind CSS watch",
+            "type": "shell",
+            "command": "nix develop --command npm run dev:client",
+            "isBackground": true,
+            "presentation": {
+                "group": "dev",
+                "panel": "dedicated",
+                "reveal": "always",
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Dev: Typecheck (tsc --watch)",
+            "detail": "Type-check the project on change (no emit)",
+            "type": "shell",
+            "command": "nix develop --command npx tsc --noEmit --watch --preserveWatchOutput",
+            "isBackground": true,
+            "presentation": {
+                "group": "dev",
+                "panel": "dedicated",
+                "reveal": "always",
+                "showReuseMessage": false
+            },
+            "problemMatcher": [
+                "$tsc-watch"
+            ]
+        },
+        {
+            "label": "Dev: Reset DB",
+            "detail": "Wipe and recreate the D1 schema (destructive)",
+            "type": "shell",
+            "command": "nix develop --command ./scripts/recreate-db.sh",
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always",
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        }
+    ]
+}
