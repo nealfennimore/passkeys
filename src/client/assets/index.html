@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Passkeys</title>
+    <title>Passkeys &middot; a WebAuthn demo</title>
+    <meta name="description" content="A minimal demo of passwordless authentication with passkeys and WebAuthn.">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="app.css">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' 'unsafe-inline' api.passkeys.neal.codes static.cloudflareinsights.com">
@@ -16,56 +19,110 @@
     <script defer type="module" src="{{bundle.js}}"></script>
 </head>
 
-<body class="flex flex-col min-h-screen">
-    <main class="grid h-full flex-grow place-items-center">
-        <section class="flex flex-col space-y-4">
-            <form id="passkeys" class="flex flex-col space-y-4">
-                <fieldset>
-                    <label class="block">
-                        <span class="block text-sm font-medium text-slate-700">Username</span>
-                        <input class="block rounded w-full" type="text" name="username" autocomplete="username webauthn"
-                            required>
-                    </label>
-                </fieldset>
+<body class="flex min-h-full flex-col bg-slate-900 text-slate-100 antialiased selection:bg-indigo-500/40">
 
-                <div class="flex rounded-md space-x-2 items-center" role="group">
-                    <button type="button" id="signup"
-                        class="bg-slate-800 px-4 py-2 text-sm font-medium text-white border border-slate-700 rounded-l-lg rounded-r-lg">
-                        Signup
-                    </button>
-                    <span class="text-sm font-medium text-slate-700">or</span>
-                    <button type="button" id="login"
-                        class="bg-slate-800 px-4 py-2 text-sm font-medium text-white border border-slate-700 rounded-l-lg rounded-r-lg">
-                        Login
-                    </button>
-                </div>
-            </form>
+    <!-- Ambient background -->
+    <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div
+            class="absolute -top-32 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-gradient-to-tr from-indigo-600/40 via-sky-500/25 to-fuchsia-600/30 blur-3xl">
+        </div>
+        <div
+            class="absolute bottom-0 right-0 h-96 w-96 translate-x-1/3 translate-y-1/3 rounded-full bg-gradient-to-tr from-sky-600/25 to-indigo-600/25 blur-3xl">
+        </div>
+    </div>
 
-            <label class="block">
-                <span class="block text-sm font-medium text-slate-700">Output</span>
-                <textarea class="block rounded w-full" id="output" rows="10" readonly></textarea>
-            </label>
-        </section>
-    </main>
-    <footer class="bg-gray-900 h-1/12">
-        <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
-            <div class="flex items-center justify-center">
-                <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2025 <a
-                        href="https://neal.codes/" class="hover:underline">neal.codes</a>
+    <main class="flex flex-grow items-center justify-center px-4 py-12 sm:py-16">
+        <section class="w-full max-w-md">
+
+            <!-- Brand -->
+            <div class="mb-8 flex flex-col items-center text-center">
+                <span
+                    class="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-sky-500 text-white shadow-lg shadow-indigo-500/40 ring-1 ring-white/20">
+                    <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <circle cx="12" cy="7.5" r="4.5" />
+                        <path d="M12 12v8" />
+                        <path d="M12 16h3.5" />
+                        <path d="M12 19h2.5" />
+                    </svg>
                 </span>
-                <div class="flex mt-4 sm:justify-center sm:mt-0 ml-4">
-                    <a href="https://github.com/nealfennimore/passkeys"
-                        class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5">
-                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                            viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.07-.6.07-.6a2.084 2.084 0 0 1 1.518 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.268-.973.63-1.325-2.2-.25-4.516-1.1-4.516-4.9A3.832 3.832 0 0 1 4.7 7.068a3.56 3.56 0 0 1 .095-2.623s.832-.266 2.726 1.016a9.409 9.409 0 0 1 4.962 0c1.89-1.282 2.717-1.016 2.717-1.016.366.83.402 1.768.1 2.623a3.827 3.827 0 0 1 1.02 2.659c0 3.807-2.319 4.644-4.525 4.889a2.366 2.366 0 0 1 .673 1.834c0 1.326-.012 2.394-.012 2.72 0 .263.18.572.681.475A9.911 9.911 0 0 0 10 .333Z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <span class="sr-only">GitHub account</span>
-                    </a>
+                <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Passkeys Demo</h1>
+                <p class="mt-2 max-w-xs text-sm text-slate-400">
+                    Passwordless sign-in with WebAuthn. Pick a username, then create a passkey or use one you already
+                    have.
+                </p>
+            </div>
+
+            <!-- Card -->
+            <div
+                class="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-8">
+
+                <form id="passkeys" class="space-y-5">
+                    <fieldset>
+                        <label for="username" class="mb-1.5 block text-sm font-medium text-slate-300">
+                            Username
+                        </label>
+                        <input id="username" name="username" type="text" autocomplete="username webauthn" required
+                            placeholder="ada.lovelace"
+                            class="block w-full rounded-xl border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-slate-100 shadow-sm transition placeholder:text-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40">
+                    </fieldset>
+
+                    <div class="grid grid-cols-2 gap-3" role="group">
+                        <button type="button" id="signup"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-indigo-500 to-sky-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 transition hover:from-indigo-600 hover:to-sky-600 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 active:scale-[.98]">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                            </svg>
+                            Sign up
+                        </button>
+                        <button type="button" id="login"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 active:scale-[.98]">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                            </svg>
+                            Log in
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Output -->
+                <div class="mt-6">
+                    <div class="mb-1.5 flex items-center justify-between">
+                        <label for="output" class="text-sm font-medium text-slate-300">Response</label>
+                        <span class="text-xs font-medium uppercase tracking-wide text-slate-500">JSON</span>
+                    </div>
+                    <textarea id="output" rows="10" readonly spellcheck="false"
+                        placeholder="The server response will appear here…"
+                        class="block w-full resize-y rounded-xl border-white/10 bg-black/30 px-3.5 py-3 font-mono text-xs leading-relaxed text-slate-200 shadow-inner shadow-black/40 placeholder:text-slate-600 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40"></textarea>
                 </div>
             </div>
+
+            <p class="mt-5 text-center text-xs text-slate-500">
+                No passwords are stored — authentication uses public-key cryptography on your device.
+            </p>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/10">
+        <div class="mx-auto flex w-full max-w-screen-xl items-center justify-center gap-4 p-6">
+            <span class="text-sm text-slate-400">© 2025
+                <a href="https://neal.codes/"
+                    class="font-medium text-slate-300 underline-offset-4 hover:text-indigo-400 hover:underline">neal.codes</a>
+            </span>
+            <a href="https://github.com/nealfennimore/passkeys" class="text-slate-400 transition hover:text-white">
+                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                    viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.07-.6.07-.6a2.084 2.084 0 0 1 1.518 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.268-.973.63-1.325-2.2-.25-4.516-1.1-4.516-4.9A3.832 3.832 0 0 1 4.7 7.068a3.56 3.56 0 0 1 .095-2.623s.832-.266 2.726 1.016a9.409 9.409 0 0 1 4.962 0c1.89-1.282 2.717-1.016 2.717-1.016.366.83.402 1.768.1 2.623a3.827 3.827 0 0 1 1.02 2.659c0 3.807-2.319 4.644-4.525 4.889a2.366 2.366 0 0 1 .673 1.834c0 1.326-.012 2.394-.012 2.72 0 .263.18.572.681.475A9.911 9.911 0 0 0 10 .333Z"
+                        clip-rule="evenodd" />
+                </svg>
+                <span class="sr-only">GitHub repository</span>
+            </a>
         </div>
     </footer>
 
